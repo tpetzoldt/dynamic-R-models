@@ -1,4 +1,4 @@
-# Rmodels
+# dynamic-R-models
 
 is a collection of code snippets of dynamic simulation models in the R programming language.
 
