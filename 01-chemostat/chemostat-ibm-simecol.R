@@ -40,7 +40,10 @@ ibm_test <- new("indbasedModel",
         r <- rmax * S / (ks + S)
 
         rnd <- runif(N)
-        newinds <- subset(inds, rnd < r * DELTAT)
+        ndx <- (rnd < r * DELTAT)
+
+        newinds <- subset(inds, ndx)
+        if (length(newinds) > 0) newinds$age <- 0
 
         ## version 1: divide existing individuals
         dN <- nrow(newinds)
@@ -53,14 +56,13 @@ ibm_test <- new("indbasedModel",
         ## for debugging only
         #cat(N, r, dN, dN_, "\n")
 
-        ## safeguard, don't divide if resource would become negative
-        if (S < dS) {
-          dS <- 0
-          newinds <- NULL
+        ## safeguard: divide only if resource remains positive
+        if (S >= dS) {
+          inds$age[ndx] <- 0
+          inds <- rbind(inds, newinds)
+          S <- S + dS
         }
 
-        inds <- rbind(inds, newinds)
-        S <- S + dS
         list(inds=inds, S=S)
       })
     }
@@ -68,7 +70,7 @@ ibm_test <- new("indbasedModel",
   parms = list(
     rmax = 0.5,
     ks = 500,
-    D = 0.2,
+    D = .1,
     S0 = 1000,
     Y = 1
   ),
@@ -80,16 +82,19 @@ ibm_test <- new("indbasedModel",
 observer(ibm_test) <- function(state, time, i, out, y) {
   S <- state$S
   N <- nrow(state$inds)
-  if ((i %% 20) == 0) cat(i, "S=", S, "N=", N, "\n")
+  age <- max(state$inds$age)
+
+  ## for debugging
+  #if ((i %% 20) == 0) cat(i, "S=", S, "N=", N, "\n")
 
   if (N > 1e5) stop("N > 1e6\n")
   if (S <0 ) stop ("S < 0")
 
-  c(time=time, N=N, S=S)
+  c(time=time, N=N, S=S, age=age)
 }
 
 ibm_test <- sim(ibm_test)
 
 o <- out(ibm_test)
-matplot(o$time, o[c("N", "S")], xlab="time", ylab="N, S", type="l")
+matplot(o$time, o[c("N", "S", "age")], xlab="time", ylab="N, S", type="l")
 head(o)
