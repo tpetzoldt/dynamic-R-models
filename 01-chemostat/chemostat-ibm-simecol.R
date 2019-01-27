@@ -41,12 +41,13 @@ ibm_test <- new("indbasedModel",
         dN <- r * N  * DELTAT
         dS <- - 1/Y * dN
 
-        ## safeguard
+        ## safeguard, don't divide if resource would become negative
         if (S < dS) {
           dS <- 0
           dN <- 0
         }
         newinds <- newbact(round(dN)) # !! round?
+
         inds <- rbind(inds, newinds)
         S <- S + dS
         list(inds=inds, S=S)
@@ -56,12 +57,12 @@ ibm_test <- new("indbasedModel",
   parms = list(
     rmax = 0.5,
     ks = 100,
-    D = 0.01,
+    D = 0.1,
     S0 = 1000,
     Y = 1
   ),
   init = list(inds = data.frame(age=rep(0, 1000)), S = 1000),
-  times = c(from=0, to=10, by=.2),
+  times = c(from=0, to=100, by=.2),
   solver = "iteration"
 )
 
