@@ -34,19 +34,30 @@ ibm_test <- new("indbasedModel",
     },
     divide = function(obj, parms) {
       inds <- obj$inds
-      N <- nrow(inds)
-      S <- obj$S
+      N    <- nrow(inds)
+      S    <- obj$S
       with(parms, {
         r <- rmax * S / (ks + S)
-        dN <- r * N  * DELTAT
+
+        rnd <- runif(N)
+        newinds <- subset(inds, rnd < r * DELTAT)
+
+        ## version 1: divide existing individuals
+        dN <- nrow(newinds)
         dS <- - 1/Y * dN
+
+        ## version 2: de-novo creation of individuals
+        dN_ <- r * N * DELTAT
+        #newinds <- newbact(round(dN_)) # !! round?
+
+        ## for debugging only
+        #cat(N, r, dN, dN_, "\n")
 
         ## safeguard, don't divide if resource would become negative
         if (S < dS) {
           dS <- 0
-          dN <- 0
+          newinds <- NULL
         }
-        newinds <- newbact(round(dN)) # !! round?
 
         inds <- rbind(inds, newinds)
         S <- S + dS
@@ -56,23 +67,29 @@ ibm_test <- new("indbasedModel",
   ),
   parms = list(
     rmax = 0.5,
-    ks = 100,
-    D = 0.1,
+    ks = 500,
+    D = 0.2,
     S0 = 1000,
     Y = 1
   ),
   init = list(inds = data.frame(age=rep(0, 1000)), S = 1000),
-  times = c(from=0, to=100, by=.2),
+  times = c(from=0, to=100, by=.1),
   solver = "iteration"
 )
 
 observer(ibm_test) <- function(state, time, i, out, y) {
   S <- state$S
   N <- nrow(state$inds)
+  if ((i %% 20) == 0) cat(i, "S=", S, "N=", N, "\n")
+
+  if (N > 1e5) stop("N > 1e6\n")
+  if (S <0 ) stop ("S < 0")
+
   c(time=time, N=N, S=S)
 }
 
 ibm_test <- sim(ibm_test)
 
 o <- out(ibm_test)
-matplot(o$time, o[c("N", "S")], xlab="time", ylab="N, S, age", type="l")
+matplot(o$time, o[c("N", "S")], xlab="time", ylab="N, S", type="l")
+head(o)
