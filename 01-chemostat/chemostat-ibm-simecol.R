@@ -1,3 +1,14 @@
+### ============================================================================
+###  Individual-based implementation of a chemostat with package simecol
+###    S:    substrate
+###    inds: table of individuals (data frame)
+###    rmax: maximum growth rate
+###  ks: half saturation constant of Monod function
+###    D:    dilution rate
+###  additional special feature of the model
+###    age:  time since last cell division (for each individual)
+### ============================================================================
+
 library(simecol)
 
 ibm_test <- new("indbasedModel",
@@ -39,28 +50,23 @@ ibm_test <- new("indbasedModel",
       with(parms, {
         r <- rmax * S / (ks + S)
 
+        ## cell division
         rnd <- runif(N)
         ndx <- (rnd < r * DELTAT)
-
         newinds <- subset(inds, ndx)
+
+        # set age of new individuals to zero
         if (length(newinds) > 0) newinds$age <- 0
 
-        ## version 1: divide existing individuals
+        ## resource consumption
         dN <- nrow(newinds)
         dS <- - 1/Y * dN
 
-        ## version 2: de-novo creation of individuals
-        dN_ <- r * N * DELTAT
-        #newinds <- newbact(round(dN_)) # !! round?
-
-        ## for debugging only
-        #cat(N, r, dN, dN_, "\n")
-
         ## safeguard: divide only if resource remains positive
         if (S >= dS) {
-          inds$age[ndx] <- 0
-          inds <- rbind(inds, newinds)
-          S <- S + dS
+          inds$age[ndx] <- 0            # set age of divided cells to zero
+          S <- S + dS                   # update resource
+          inds <- rbind(inds, newinds)  # add new individuals to population
         }
 
         list(inds=inds, S=S)
