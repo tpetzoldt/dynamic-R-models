@@ -8,48 +8,21 @@
 ### ============================================================================
 
 
-main <- function(time, obj, parms) {
-  obj <- live(obj, parms)
-  obj <- dilute(obj, parms)
-  obj <- divide(obj, parms)
-  obj
-}
+live <- function(time, inds, S, parms, DELTAT){
+  inds$age    <- inds$age + DELTAT
 
-
-newbact <- function(n) {
-  if (n > 0) {
-    data.frame(age = rep(0, n))
-  } else {
-    NULL
-  }
-}
-
-live <- function(obj, parms){
-  obj$inds$age    <- obj$inds$age + parms$DELTAT
-  obj
-}
-
-dilute  <- function(obj, parms) {
-  S    <- obj$S
-  inds <- obj$inds
-  N    <- nrow(inds)
 
   with(parms, {
-    rnd <- runif(N)
+
+    ## dilute
+    N    <- nrow(inds)
+    rnd  <- runif(N)
     inds <- subset(inds, D * DELTAT < rnd)
     S <- S + D * (S0 - S) * DELTAT
-    list(inds=inds, S=S)
-  })
-}
-
-divide <- function(obj, parms) {
-  inds <- obj$inds
-  N    <- nrow(inds)
-  S    <- obj$S
-  with(parms, {
-    r <- rmax * S / (ks + S)
 
     ## cell division
+    N    <- nrow(inds)
+    r <- rmax * S / (ks + S)
     rnd <- runif(N)
     ndx <- (rnd < r * DELTAT)
     newinds <- subset(inds, ndx)
@@ -67,30 +40,25 @@ divide <- function(obj, parms) {
       S <- S + dS                   # update resource
       inds <- rbind(inds, newinds)  # add new individuals to population
     }
-
     list(inds=inds, S=S)
   })
 }
 
+inds  <- data.frame(age=rep(0, 1000))
+S     <- 1000
+parms <- list(rmax = 0.5, ks = 500, D = .1, S0 = 1000,Y = 1)
+DELTAT <- 0.1
+times <- seq(0, 100, DELTAT)
 
-parms = list(
-  rmax = 0.5,
-  ks = 500,
-  D = .1,
-  S0 = 1000,
-  Y = 1
-)
-
-state <- list(inds = data.frame(age=rep(0, 1000)), S = 1000)
-
-times <- seq(0, 100, .1)
-
-o <- data.frame(time=times[1], N=nrow(state$inds), S=state$S, maxage=max(state$inds$age))
+o <- data.frame(time=times[1], N=nrow(inds), S=S, maxage=max(inds$age))
 
 for (i in 2:length(times)) {
-  parms$DELTAT <- times[i] - times[i-1]
-  state <- main(times[i], state, parms)
-  ret <- c(time = times[i], N=nrow(state$inds), S=state$S, maxage=max(state$inds$age))
+
+  state <- live(times[i], inds, S, parms, DELTAT)
+  inds <- state$inds
+  S    <- state$S
+
+  ret <- c(time = times[i], N=nrow(inds), S=S, maxage=max(inds$age))
   o <- rbind(o, ret)
 }
 
