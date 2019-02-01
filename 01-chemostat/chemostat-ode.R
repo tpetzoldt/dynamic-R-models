@@ -6,13 +6,13 @@ chemostat <- function(time, init, parms) {
     mu   <- mumax * P/(kp + P)  # Monod equation
     dAlg <- mu * Alg - D * Alg
     dP   <-  D *(P0 - P) - 1/Y * mu * Alg
-    list(c(dAlg, dP), mu)
+    list(c(dAlg, dP), mu=mu)
    })
 }
 parms <- c(
   mumax = 0.5,    # 1/d
   kp    = 0.01,   # half saturation constant (mg/L)
-  Y     = 41,     # yield coefficient
+  Y     = 41,     # yield coefficient (stoichiometric C:P ratio)
   D     = 0.1,    # 1/d
   P0    = 0.05    # P in inflow (mg/L)
 )
