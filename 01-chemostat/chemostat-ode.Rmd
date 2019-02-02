@@ -1,7 +1,7 @@
 ---
 title: "Differential Equation Model of a Chemostat"
 author: "Thomas Petzoldt"
-date: "February 1, 2019"
+date: "February 2, 2019"
 output: html_document
 ---
 
@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-The example shows a chemostat model by example of autotrophic organisms (Algae, $Alg$), where growth is limited by a single nutrient (phosphorus, $P$) via a Monod equation.
+The example shows a chemostat model by example of autotrophic organisms (Algae, $X$), where growth is limited by a single nutrient (phosphorus, $P$) via a Monod equation.
 
 ## Implementation
 
@@ -24,9 +24,9 @@ library("rootSolve")
 chemostat <- function(time, init, parms) {
   with(as.list(c(init, parms)), {
     mu   <- mumax * P/(kp + P)  # Monod equation
-    dAlg <- mu * Alg - D * Alg
-    dP   <-  D *(P0 - P) - 1/Y * mu * Alg
-    list(c(dAlg, dP), mu=mu)
+    dX <- mu * X - D * X
+    dP   <-  D *(P0 - P) - 1/Y * mu * X
+    list(c(dX, dP), mu=mu)
    })
 }
 parms <- c(
@@ -37,22 +37,22 @@ parms <- c(
   P0    = 0.05    # P in inflow (mg/L)
 )
 times <- seq(0, 40, 0.1)  # (d)
-init  <- c(Alg=0.01, P=0.05) # Phytoplankton C and Phosphorus P (mg/L)
+init  <- c(X=0.01, P=0.05) # Phytoplankton C and Phosphorus P (mg/L)
 ```
 
 ## Dynamic simulation
 
 A dynamic simulation can then be performed by function `ode`, using the default algorithm `lsoda` with automatic integration step size. The result (`out`) is then a matrix-like object of class `deSolve` that is supported by a generic (i.e. object oriented) plot function.
 
-```{r, single}
+```{r, single, , fig.height=5}
 out <- ode(init, times, chemostat, parms)
 plot(out)
 ```
 
 The plot function allows also to show several scenarios simultanaeously:
 
-```{r, multiple}
-init  <- c(Alg=1.0, P=0.05)
+```{r, multiple, fig.height=3}
+init  <- c(X=1.0, P=0.05)
 p1 <- p2 <- p3 <- parms
 p1["D"] <- 0; p2["D"] <- 0.3; p3["D"] <- 0.5
 out <- ode(init, times, chemostat, parms)
@@ -60,7 +60,7 @@ out1 <- ode(init, times, chemostat, p1)
 out2 <- ode(init, times, chemostat, p2)
 out3 <- ode(init, times, chemostat, p3)
 
-plot(out, out1, out2, out3, which=c("Alg", "P"))
+plot(out, out1, out2, out3, which=c("X", "P"))
 ```
 
 ## Steady State
@@ -69,14 +69,15 @@ The equilibrium can be aproximated numerically with package **rootSolve**.
 We use a loop here for simplicity, even if list-based approaches (e.g. `lapply`) 
 may appear as more elegant for the intermediate and advanced **R** user.
 
-```{r, steadystate}
+
+```{r, steadystate, fig.height=3}
 state <- data.frame(
   D = seq(0, 0.6, length.out = 100),
   X = 0,
   S = 0
 )
 
-init  <- c(Alg=0.01, P=0.05) 
+init  <- c(X=0.01, P=0.05) 
 
 for (i in 1:nrow(state)) {
   parms["D"] <- state$D[i]
@@ -95,7 +96,7 @@ plot(S * X ~ D, data = state, type = "l")
 
 The same equilibrium can be reproduced by the analytical solution of chemostat equations.
 
-```{r}
+```{r analytical, fig.height=3}
 D <- seq(0, 0.6, length.out = 100)
 mumax = 0.5;  kp    = 0.01; Y     = 41; P0    = 0.05
 
