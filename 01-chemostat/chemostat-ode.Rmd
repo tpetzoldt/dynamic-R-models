@@ -91,3 +91,25 @@ plot(X ~ D, data = state, type = "l")
 plot(S * X ~ D, data = state, type = "l")
 ```
 
+## Analytical Solution
+
+The same equilibrium can be reproduced by the analytical solution of chemostat equations.
+
+```{r}
+D <- seq(0, 0.6, length.out = 100)
+mumax = 0.5;  kp    = 0.01; Y     = 41; P0    = 0.05
+
+P <- D * kp / (mumax - D)
+P <- ifelse(D > (mumax * P0)/(kp + P0), P0, P)
+
+X <- Y * (P0 - P)
+
+par(mfrow=c(1,3))
+plot(D, P, type="l")
+plot(D, X, type="l")
+plot(D, X*P, type="l")
+```
+
+## Outlook
+
+The chemostat equations can serve as a starting point for further extensions, e.g. the production of specific substances in bioreactors, or additional trophical levels. The equations are the fundamental for the description of other technical or non-technical flow-through systems, up to waste water treatment plants, or lakes.
