@@ -9,6 +9,7 @@
 ###    age:  time since last cell division (for each individual)
 ### ============================================================================
 
+## @knitr chemostat_2
 library(simecol)
 
 ibm_test <- new("indbasedModel",
@@ -98,9 +99,3 @@ observer(ibm_test) <- function(state, time, i, out, y) {
 
   c(time=time, N=N, S=S, age=age)
 }
-
-ibm_test <- sim(ibm_test)
-
-o <- out(ibm_test)
-matplot(o$time, o[c("N", "S", "age")], xlab="time", ylab="N, S", type="l")
-head(o)

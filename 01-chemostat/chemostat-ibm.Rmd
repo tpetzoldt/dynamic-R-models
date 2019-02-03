@@ -1,0 +1,61 @@
+---
+title: "An individual-based model of a flow-through system"
+author: "Thomas Petzoldt"
+date: "2019-02-03"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(simecol)
+```
+
+## Introduction
+
+Note: this is an interactive document. <span style="color:blue">Please
+use the `Code` buttons to fold or unfold the code of individual code cunks or
+of the complete document.</span> The content is best viewed with
+Chrome or Firefox.
+
+## General approach
+
+## Plain implementation
+
+```{r chem1_1, cache=FALSE, echo=FALSE}
+knitr::read_chunk("chemostat-ibm-plain.R")
+```
+
+```{r chem1_2,  eval=TRUE}
+<<chemostat_1>>
+```
+
+```{r chem1_3}
+matplot(o$time, o[c("N", "S", "maxage")], xlab="time", ylab="N, S", type="l")
+head(o)
+```
+
+## Object oriented with **simecol**
+
+
+```{r chem_2_1, cache=FALSE, echo=FALSE}
+knitr::read_chunk("chemostat-ibm-simecol.R")
+```
+
+```{r chem_2_2, eval=TRUE}
+<<chemostat_2>>
+```
+
+
+```{r chem_2_3, eval=TRUE}
+ibm_test <- sim(ibm_test)
+
+o <- out(ibm_test)
+matplot(o$time, o[c("N", "S", "age")], xlab="time", ylab="N, S", type="l")
+```
+

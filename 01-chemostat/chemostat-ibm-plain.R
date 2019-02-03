@@ -5,9 +5,12 @@
 ###    rmax: maximum growth rate
 ###  ks: half saturation constant of Monod function
 ###    D:    dilution rate
+###
+### Note: the @knitr directives are used for a documentation tool,
+###       they can be ignored by the user
 ### ============================================================================
 
-
+## @knitr chemostat_1
 live <- function(time, inds, S, parms, DELTAT){
   inds$age    <- inds$age + DELTAT
 
@@ -62,7 +65,6 @@ for (i in 2:length(times)) {
   o <- rbind(o, ret)
 }
 
-
+## @knitr chemostat_1_run
 matplot(o$time, o[c("N", "S", "maxage")], xlab="time", ylab="N, S", type="l")
 head(o)
-
