@@ -1,3 +1,31 @@
+## =============================================================================
+##
+## Multi-Species Predator-Prey Model
+## ---------------------------------
+##
+## The well-known predator-prey can be written as a single differential equation
+## in matrix notation. It then allows the generalisation to an arbitrary number
+## of interacting species, not only 2 but also 4 like in the example or hundreds
+## or thousands. All species interact with each other, and as
+## a benefit, the matrix form is not only more compact, but also much faster 
+## than versions with explicit equation per species.
+## 
+## Equation:
+##   dN/dt = r * N + N * (A %*% N)
+##
+## with:
+##   N:   vector of abundances of the populations
+##   A:   interaction matrix, who eats what
+##   r:   population growth resp. death rate
+##   %*%: vector multiplication
+##
+## Author: Thomas Petzoldt, TU Dresden
+## License: GPL >= 2, https://www.gnu.org/licenses/
+## Please cite our work when using this package:
+##     citation(package="deSolve"       #  doi:10.18637/jss.v033.i09
+## =============================================================================
+
+
 library(deSolve)
 
 model <- function(t, n, parms) {
