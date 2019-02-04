@@ -21,6 +21,8 @@ library("shiny")
 ## - or started from a remote server (limno-live)
 ```
 
+<span style="color:red">Under construction:</span> the embedded shiny apps don't show up yet, because Github blocks embedded iframes from non-encrypted (i.e. http instead of https) connections.
+
 ## Introduction
 
 The following examples show how to control dynamic models implemented in the 
@@ -132,7 +134,7 @@ from **RStudio** or placed on a shiny-enabled web server.
 **Exercise:** Copy the app to Rstudio, save it to the disc (fille
   app.R) and try it out
 
-**More about this:** https://shiny.rstudio.com/articles/single-file.html
+**More about this:** https://shiny.rstudio.com
 
 
 ## Combine the parts
