@@ -157,8 +157,8 @@ matplot(o$time, o[c("N", "S", "age")], xlab="time", ylab="N, S", type="l")
 As the IBM is a stochastic model, it would make sense to repeat it seveal times.
 
 
-```{r chem_2_4, eval=TRUE}
-par(mfrow=c(3,3))
+```{r chem_2_5, eval=TRUE}
+par(mfrow=c(3,3), mar=c(4,3,1,1)+0.1)
 ret <- lapply(1:9, FUN=function(x) cbind(run=x, out(sim(ibm_test))))
 ret <- lapply(ret, function(o) matplot(o$time, o[c("N", "S")], xlab="time", ylab="N, S", type="l"))
 ```
