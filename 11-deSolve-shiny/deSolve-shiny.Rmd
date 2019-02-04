@@ -1,0 +1,323 @@
+---
+title: "Interactive web-based simulation models with deSolve and shiny"
+author: "Thomas Petzoldt"
+date: "2017-06-22, 2019-02-04"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("deSolve")
+library("shiny")
+
+## The following setting uses the shiny apps are
+## - taken from local directories (FALSE)
+## - or started from a remote server (limno-live)
+```
+
+## Introduction
+
+The following examples show how to control dynamic models implemented in the 
+[**R**](https://www.r-project.org) language interactively from a web interface. We use 
+a technically simple ordinary differential equation (ODE) model as an example, then we will
+see how to add GUI elements and finally how we can make it faster by
+using compiled code.
+
+This tutorial was originally presented at the [useR!2017](https://user2017.brussels/) 
+conference in Brussels.
+
+The HTML version embeds the shiny apps from a remote server and needs no local 
+installation. The source code of this HTML file is in Rmarkdown (.Rmd) format 
+that can be run locally from within RStudio when the shiny apps locally installed.
+
+Note: this is an interactive document. <span style="color:blue">Please
+use the `Code` buttons to unfold the code of individual code cunks or
+for the complete document.</span> The content is best viewed with
+Chrome or Firefox.
+
+### Ingredients needed
+
+0. A recent installation of the [**R**](https://www.r-project.org) language
+1. A dynamic **deSolve** model
+2. The **shiny** package and an R script **app.R**
+3. A **shiny server**
+    * the built-in server of [**RStudio**](https://www.rstudio.com) (on the local machine)
+    * the web service [shinyapps.io](http://www.shinyapps.io/)
+    * an own Linux server with shiny-server software, see  http://shiny.rstudio.com/deploy/ how to install it
+
+
+### The Brusselator
+
+The Brusselator (Brussels Oscillator) a mathematical model of an
+autocatalytic reaction of two substances A and B, two intermediate products 
+X and Y and two final products C and D. The latter are continuesly removed.
+
+1. A &rarr; X
+2. B + X &rarr; Y + C
+3. 2X + Y &rarr;  3X
+4. X &rarr; D
+
+* developed by Ilya Prigogine and R. Lefever 1967,68 at the Université
+  Libre de Bruxelles
+* important theoretical example for studying oscillations and
+  bifurcation
+* see [Wikipedia](https://en.wikipedia.org/wiki/Brusselator) for details
+
+$$
+\begin{aligned}
+\frac{dX}{dt} &= k_1 A - k_2 B X + k_3 X^2 Y - k_4 X \\
+\frac{dY}{dt} &= k_2 B X - k_3 X^2 Y
+\end{aligned}
+$$
+<hr />
+
+### The Brusselator in **R**
+
+Implementation of the model in **R** is straightforward. We need the package
+**deSolve**, translate the differential equations of the Brusselator
+into an R function, define initial values ($y_0$), parameters and time
+steps and then use ode for the numerical solution. Finally we plot the
+results.
+
+```{r, fig.height=4}
+library("deSolve")
+
+brusselator <- function(t, y, p) {
+  with(as.list(c(y, p)), {
+    dX <- k1*A   - k2*B*X    + k3*X^2*Y - k4*X
+    dY <- k2*B*X - k3*X^2*Y
+    list(c(X=dX, Y=dY))
+  })
+}
+
+y0 <- c(X=1, Y=1)
+parms <- c(A=1, B=3, k1=1, k2=1, k3=1, k4=1)
+out <- ode(y = y0, times=seq(0, 100, .1), brusselator, parms)
+plot(out)
+```
+
+
+### A minimalistic Shiny app
+
+```{r, eval=FALSE}
+library("shiny")
+
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    hist(rnorm(input$obs))
+  })
+}
+
+ui <- fluidPage(
+    sliderInput("obs", "Number of observations:", min = 10, max = 500, value = 100),
+    plotOutput("distPlot")
+)
+
+shinyApp(ui = ui, server = server)
+```
+
+The second part creates the web interface. The app consists of a
+server element doing the computations and plotting, and a user
+interface (ui), that is responsible for handling user inputs and for
+sending the outputs back to the user.  Both parts, the server and the
+ui can be saved in a single file 'app.R'. It can then be run directly
+from **RStudio** or placed on a shiny-enabled web server.
+
+**Exercise:** Copy the app to Rstudio, save it to the disc (fille
+  app.R) and try it out
+
+**More about this:** https://shiny.rstudio.com/articles/single-file.html
+
+
+## Combine the parts
+
+Now let's combine the shiny ui/server environment with our Brusselator
+model.  We start with a very simple application that allows to change
+two parameters `A` and `B` (essentially the start concentrations of
+substances `A` and `B`) and then plots the time series of the model.
+
+### A first approach
+
+```{r results='asis', echo=FALSE}
+cat('<iframe src="http://limno-live.hydro.tu-dresden.de/apps/bruss01" style="border: none; width: 75%; height: 500px" />\n')
+```
+
+The code is stunningly simple, consisting of three parts:
+
+1. The model from above (without any modifications).
+2. The server component. It consists of a single function getting
+`input` and `output`.  The two parameters `A` and B are taken from the
+`input` and the plot is then directed to an element
+`output$brussels`of the `output`.  Note also that we use deSolve's
+function `matplot.0d` instead of `plot` as before, so that both state
+variables appear in a single figure.
+3. The ui calls then a shiny element `fluidpage` with two
+   `numericInput` calls and one call to `plotOutput`.
+
+
+```{r bruss1_1, cache=FALSE, echo=FALSE}
+knitr::read_chunk("bruss01/app.R")
+```
+
+```{r bruss1_2,  eval=FALSE}
+<<brusselator_1>>
+```
+
+
+### Improvments
+
+Now, we can start to adapt the app to our needs: change the layout,
+unlock more parameters of the model, add a second figure and so on. An
+especially convenient layout is the `sidebarLayout` that separates the
+control elements (`sidebarPane` left or top) and output of the app
+(`mainPanel` right or bottom).
+
+HTML tags like `h2`, `h3`, or `p` can be used to annotate the app, see
+help pages for more.
+
+```{r results='asis', echo=FALSE}
+cat('<iframe src="http://limno-live.hydro.tu-dresden.de/apps/bruss02" style="border: none; width: 100%; height: 800px" />\n')
+```
+
+
+```{r bruss2_1, cache=FALSE, echo=FALSE}
+knitr::read_chunk("bruss02/app.R")
+```
+
+```{r bruss2_2,  eval=FALSE}
+<<brusselator_2>>
+```
+
+
+The code above should work as intended, but there are of course
+further options of improvement.
+
+1. Improve layout and design of the app: this can be quite time
+   consuming and wil not be handled here.
+2. Generalize the app, so that new models can instantly be
+   implemented.
+3. Make the model faster.
+
+Here, we want to focus on options 2 and 3.
+
+### Generalization
+
+**R** is a programming language, so why not creating the user
+interface directly from information found already in the initial
+values and parameters of the model?  This would allow us to save
+stupid typing (and copy and paste!) and to adapt the user interface
+``automagically'' if we change something in the model.
+
+The solution is, to construct lists of lists beforehand, in our case
+one for the parameters `L_parms` and one for the initial values
+`L_y0`. Each element of the top level list contains all the parameters
+needed by a call to `numericInput`, including some constant optional
+values like the `witdh` of the input field.  The templates stored in
+these lists are then expanded with `lapply` and `do.call`.  The result
+is exacly the same as befors, compare:
+http://limno-live.hydro.tu-dresden.de/apps/bruss03
+
+
+<!---
+```{r results='asis', brusselator_3}
+cat('<iframe src="http://limno-live.hydro.tu-dresden.de/apps/bruss03" style="border: none; width: 1024px; height: 800px" />\n')
+```
+--->
+
+
+```{r bruss3_1, cache=FALSE, echo=FALSE}
+knitr::read_chunk("bruss03/app.R")
+```
+
+```{r bruss3_2,  eval=FALSE}
+<<brusselator_3>>
+```
+
+
+## Make it faster
+
+As a second improvement of our app, we want to make our model
+faster. Quick response of a server based app is crucial when models
+become bigger, because our users may think that the connection is
+broken otherwise.
+
+This is fortunately possible, given that some development tools
+(e.g. the Rtools on Windows) are installed.
+
+Package **deSolve** supports models in *compiled code* provided by a
+`.dll` / `.so` directly.  It allows the solver to communicate directly
+with the model, and without any overhead of a back-call to **R**.  Our
+experience shows, that this can then be 2 ... 200 times faster,
+depending on the type of model.
+
+Several approaches were developed, depending on model complexity and
+your skills:
+
+* write it your model ``by hand'' in Fortran or C
+* use a code generator:
+    * package **ccSolve** from Karline Soetaert (from Github)
+    * package **cOde ** from David Kaschek for smaller models
+    * package **rodeo** from David Kneis for complex models
+
+We use **cOde** here, because it is especially convenient for small
+models, while for more complex models, the table based notation of
+**rodeo** can be more advantageous.
+
+### The Brusselator in C
+
+Package **cOde** allows to compile our (technically!) simple
+Brusselator without knowledge of Fortran or C.  The only prerequisite
+is, that we have the development tools (the compiler etc. ...)
+installed, that the system PATH correctly set, and that write access
+to the working directory is granted.
+
+Then it is sufficient, to write the differential equations in a
+character vector and then to compile it with `funC`. This creates a C
+file and compiles it into a shared library (.dll or .so), which then
+can be numerically solved with `odeC`.
+
+```{r bruss4_1, cache=FALSE, echo=FALSE}
+knitr::read_chunk("bruss04/brussC_test.R")
+```
+
+```{r bruss4_2,  eval=FALSE}
+<<brusselator_4_core>>
+```
+
+### Shiny app with compiled code
+
+As a final exercise, we modify our app from before, to use the
+compiled C version of the model instead of the R version.
+
+```{r bruss4_3, cache=FALSE, echo=FALSE}
+knitr::read_chunk("bruss04/app.R")
+```
+
+```{r bruss4_4,  eval=FALSE}
+<<brusselator_4>>
+```
+
+The result looks identical as before, just a little bit faster.
+
+```{r results='asis', echo=FALSE}
+cat('<iframe src="http://limno-live.hydro.tu-dresden.de/apps/bruss04" style="border: none; width: 100%; height: 800px" />\n')
+```
+
+
+If you want to see the C code: [here is it](http://limno-live.hydro.tu-dresden.de/tutorials/brusselator.c.txt)
+
+## Further reading
+
+* The reference site of the **deSolve** package is http://desolve.r-forge.r-project.org
+* Further examples may appear at https://github.com/tpetzoldt/dynamic-R-models
+
+----
+
+**Original author:** [tpetzoldt](https://github.com/tpetzoldt)
+
