@@ -21,7 +21,11 @@ library("shiny")
 ## - or started from a remote server (limno-live)
 ```
 
-<span style="color:red">Under construction:</span> the embedded shiny apps don't show up yet, because Github blocks embedded iframes from non-encrypted (i.e. http instead of https) connections.
+<span style="color:red">Under construction: the embedded shiny apps don't 
+show up yet here, because Github blocks embedded iframes from non-encrypted (i.e. http 
+instead of https) connections.</span> Please use 
+[**this link**](http://limno-live.hydro.tu-dresden.de/user2017/2.5-desolve-shiny/desolve-shiny.html) 
+as a temporary work around.
 
 ## Introduction
 
