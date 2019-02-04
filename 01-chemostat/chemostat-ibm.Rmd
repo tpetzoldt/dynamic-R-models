@@ -1,7 +1,7 @@
 ---
 title: "An individual-based model of a flow-through system"
 author: "Thomas Petzoldt"
-date: "2019-02-03"
+date: "2019-02-04"
 output:
   html_document:
     toc: true
@@ -19,13 +19,57 @@ library(simecol)
 ## Introduction
 
 Note: this is an interactive document. <span style="color:blue">Please
-use the `Code` buttons to fold or unfold the code of individual code cunks or
+use the `Hide` resp. `Code` buttons to fold or unfold the code of individual code cunks or
 of the complete document.</span> The content is best viewed with
 Chrome or Firefox.
 
 ## General approach
 
+Let's assume the following system of ordinary differential equations for a 
+flow-through bioreactor (chemostat), where $X$ is the concentration of organisms (e.g. cells/volume)
+in the system growing on a limited resource $S$ (e.g. nutrient/volume). The instantanaeous growth rate $r$ (1/time) depends 
+on a maximum growth rate $r_{max}$ and the resource concentration $S$ via a Monod 
+equation, with half-saturatio constant $k_s$.
+Fresh medium with resource concentration $S_0$ is imported with a dilution rate 
+$D$ that controls also export of cells and of remaining medium. A stoichiometric 
+coefficient ($Y$, yield) converts between concentration units of cells and nutrients:
+
+$$
+\frac{dX}{dt} = (r - D) \cdot X\\
+\frac{dS}{dt} = D \cdot (S_0-S) - \frac{S}{Y}\\
+\text{with:}\\
+r = r_{max} \cdot \frac{S}{k_s+S}
+$$
+The above system of equations applies for a continuous system, but there may be 
+reasons to adapt (or approximate) such a model to a discrete-time step and a 
+discrete number of individuals. One reason may be a relatively small number of organisms 
+(e.g. a few hundred rotifers instead of 10^8 cells of bacteria) or the nesseccity to describe
+individual variation (e.g. age, size, cell content) of the organisms.
+
+This can be done with a so-called *individual-based model*, where the equations of such a system are, in principle, quite similar. 
+Its main differences are:
+
+* the population is represented by a countable number ($N$) of individuals instead of a state variable $X$,
+* the model is solved as a stochastic process where probabilities are used instead of rate parameters (1/time),
+* an event-like fixed time step scheme is used instead of a continuous integrator.
+
+
 ## Plain implementation
+
+The following example implements a very basic individual-based approach. The population of 
+individuals is implemented as a data frame (`inds`) with, in this example, only one single column (`age`).
+Substrate $S$ is implemented as a non-individual-based pool variable, the parameters are in a vector (`parms`).
+
+All life-actvities are carried out in one `live`-function. Mortality and cell division are realized by
+subsetting randomly selected surviving individuals from the population, or by 
+adding copies of randomly selected "dividing cells" to the population. 
+The `age` of divided cells is set to zero for both daughters of each parent cell.
+
+Mortality and substrate input depend on $D$, while cell division depends on the 
+substrate concentration. A safeguard check prevents $S$ for becoming negative and
+a control parameter `DELTAT` allows an adaption of the time step.
+
+The solution of the model is then straightforward by iterating the `live`-function in a for-loop.
 
 ```{r chem1_1, cache=FALSE, echo=FALSE}
 knitr::read_chunk("chemostat-ibm-plain.R")
@@ -35,12 +79,35 @@ knitr::read_chunk("chemostat-ibm-plain.R")
 <<chemostat_1>>
 ```
 
+The simulation shows then a typical time series. The curves show a stochastic 
+pattern, that can be reduced if the sample size (the number of individuals) is 
+increased to, e.g. 10.000 or more. The yield is set to $Y=1$ to make comparisons easier.
+
+
 ```{r chem1_3}
 matplot(o$time, o[c("N", "S", "maxage")], xlab="time", ylab="N, S", type="l")
 head(o)
 ```
 
-## Object oriented with **simecol**
+## Object oriention with **simecol**
+
+The above implementation is extremely simple and may already serve as a starting 
+point for extensions. However, almost all variables are held in global work space,
+which can become cumbersome and confusing when the application grows.
+
+Package **simecol** @Petzoldt2007 suggests an object oriented programming (OOP) 
+approach for such cases. In contrast to other OOP approaches for IBMs that model
+individuals as objects in their habitat, in an ecosystem and so forth, simecol "models
+the components of a simulation model". This is quite pragmatic and aims to make 
+comparison of different simulations (scenarios, instances) easier. Details of the 
+approach are found in @Petzoldt2007. 
+
+In the example below, all different processes of the live-loop are subdivided in 
+separated functions in the `equations`-slot of the object that are then called 
+from the `main function. Parameters (`parms`), the `init`-values of the state variables 
+(a list with `inds` the table of individuals and `S` the substrate pool),
+and the `times` are encapsulated in the object. The solver is set to `iteration` 
+that is built-in in the package.
 
 
 ```{r chem_2_1, cache=FALSE, echo=FALSE}
@@ -51,8 +118,36 @@ knitr::read_chunk("chemostat-ibm-simecol.R")
 <<chemostat_2>>
 ```
 
+### Simulation
+
+The simulation of the model can then, in principle, be triggered by:
+
+```{r chem2_2a, eval=FALSE}
+ibm_test <- sim(ibm_test)
+o <- out(ibm_test)
+```
+
+### Observer function
+
+In this case, the complete set of state variables (i.e. S and the complete data 
+frame of inds) ist stored for each time step, so that ibm_test contains both,
+the original model (with equation and parameters) and all simulation results, 
+that can be extracted with out(). It is then up to the user to analyze the results from out.
+
+The analysis of results can already be made during the simulation by providing an 
+optional `observer`-function. It gets the full state information and aggregates the
+required parts, and it can also be used for printing status information or for
+animated graphics during the simulation.
 
 ```{r chem_2_3, eval=TRUE}
+<<chemostat_3>>
+```
+
+
+
+
+
+```{r chem_2_4, eval=TRUE}
 ibm_test <- sim(ibm_test)
 
 o <- out(ibm_test)

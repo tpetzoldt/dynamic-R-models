@@ -86,6 +86,7 @@ ibm_test <- new("indbasedModel",
   solver = "iteration"
 )
 
+## @knitr chemostat_3
 observer(ibm_test) <- function(state, time, i, out, y) {
   S <- state$S
   N <- nrow(state$inds)
