@@ -89,7 +89,7 @@ matplot(o$time, o[c("N", "S", "maxage")], xlab="time", ylab="N, S", type="l")
 head(o)
 ```
 
-## Object oriention with **simecol**
+## Object orientation with **simecol**
 
 The above implementation is extremely simple and may already serve as a starting 
 point for extensions. However, almost all variables are held in global work space,
@@ -104,7 +104,7 @@ approach are found in @Petzoldt2007.
 
 In the example below, all different processes of the live-loop are subdivided in 
 separated functions in the `equations`-slot of the object that are then called 
-from the `main function. Parameters (`parms`), the `init`-values of the state variables 
+from the `main` function. Parameters (`parms`), the `init`-values of the state variables 
 (a list with `inds` the table of individuals and `S` the substrate pool),
 and the `times` are encapsulated in the object. The solver is set to `iteration` 
 that is built-in in the package.
@@ -143,14 +143,25 @@ animated graphics during the simulation.
 <<chemostat_3>>
 ```
 
-
-
+The simulation can then be run  with the `sim`-function:
 
 
 ```{r chem_2_4, eval=TRUE}
 ibm_test <- sim(ibm_test)
-
 o <- out(ibm_test)
 matplot(o$time, o[c("N", "S", "age")], xlab="time", ylab="N, S", type="l")
 ```
+
+### Repeated simulations
+
+As the IBM is a stochastic model, it would make sense to repeat it seveal times.
+
+
+```{r chem_2_4, eval=TRUE}
+par(mfrow=c(3,3))
+ret <- lapply(1:9, FUN=function(x) cbind(run=x, out(sim(ibm_test))))
+ret <- lapply(ret, function(o) matplot(o$time, o[c("N", "S")], xlab="time", ylab="N, S", type="l"))
+```
+
+
 

@@ -57,7 +57,7 @@ ibm_test <- new("indbasedModel",
         newinds <- subset(inds, ndx)
 
         # set age of new individuals to zero
-        if (length(newinds) > 0) newinds$age <- 0
+        if (nrow(newinds) > 0) newinds$age <- 0
 
         ## resource consumption
         dN <- nrow(newinds)
@@ -65,9 +65,11 @@ ibm_test <- new("indbasedModel",
 
         ## safeguard: divide only if resource remains positive
         if (S >= dS) {
-          inds$age[ndx] <- 0            # set age of divided cells to zero
+          if(nrow(inds)) {
+            inds$age[ndx] <- 0            # set age of divided cells to zero
+            inds <- rbind(inds, newinds)  # add new individuals to population
+          }
           S <- S + dS                   # update resource
-          inds <- rbind(inds, newinds)  # add new individuals to population
         }
 
         list(inds=inds, S=S)
