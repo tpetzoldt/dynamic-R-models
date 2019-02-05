@@ -14,6 +14,8 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(simecol)
+library(plyr)
+library(ggplot2)
 ```
 
 ## Introduction
@@ -154,14 +156,36 @@ matplot(o$time, o[c("N", "S", "age")], xlab="time", ylab="N, S", type="l")
 
 ### Repeated simulations
 
-As the IBM is a stochastic model, it would make sense to repeat it seveal times.
-
+As the IBM is a stochastic model, it would make sense to repeat it seveal times. 
+The following gigure shows four independent simulation runs:
 
 ```{r chem_2_5, eval=TRUE}
-par(mfrow=c(3,3), mar=c(4,3,1,1)+0.1)
-ret <- lapply(1:9, FUN=function(x) cbind(run=x, out(sim(ibm_test))))
+par(mfrow=c(2,2), mar=c(4,3,1,1)+0.1)
+ret <- lapply(1:4, FUN=function(x) cbind(run=x, out(sim(ibm_test))))
 ret <- lapply(ret, function(o) matplot(o$time, o[c("N", "S")], xlab="time", ylab="N, S", type="l"))
 ```
+
+... and the next one a binned representation of 100 simulations. 
+
+```{r}
+library(plyr)
+library(ggplot2)
+ret <- lapply(1:100, FUN=function(x) cbind(run=x, out(sim(ibm_test))))
+longtab <- rbind.fill(ret)
+
+ggplot(longtab, aes(time, N)) + geom_bin2d(binwidth=c(1,10))
+ggplot(longtab, aes(time, S)) + geom_bin2d(binwidth=c(1,10))
+```
+
+Here, `lapply`returns a list of 100 data frames with the run number in the first column.
+Function `rbind.fill` (from package **plyr**) then concatenates all these data 
+frames together into tidy database format `longtab` that can then be plotted with
+one of the ggplot functions.
+
+### Equilibrium
+
+
+
 
 
 
