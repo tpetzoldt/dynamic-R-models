@@ -184,12 +184,13 @@ one of the ggplot functions.
 
 ### Equilibrium
 
-Finally, let's run the IMB over a Dilution rate gradient with each 10 replicates and
-assume that the state at time $t=100$ is close to the equilibrium of the chemostat. 
-To speed up, function `parLapply` from the **parallel** package is employed. 
-This is, in principle, straightforward, but one has to make sure that all required 
-functions and data (and packages, here **simecol**) are transferred or loaded to 
-all respective worker **R** instances of each core.
+Finally, let's run the IBM over a dilution ($D$) rate gradient with each 10 replicates and
+assume that the state at the final time step ($t=100$) is close to the equilibrium of the chemostat. 
+To speed up, function `parLapply` from package **parallel** is employed, so that 
+the simulations run simultanaeously on the 4 CPU cores.
+This is, in principle, straightforward, one has only to make sure that all required 
+functions, data, and packages (here **simecol**) are transferred or loaded to 
+all respective worker **R** instances.
 
 ```{r, equilibrium_multicore}
 library(parallel)
