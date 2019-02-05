@@ -14,7 +14,6 @@
 live <- function(time, inds, S, parms, DELTAT){
   inds$age    <- inds$age + DELTAT
 
-
   with(parms, {
 
     ## dilute
@@ -31,7 +30,7 @@ live <- function(time, inds, S, parms, DELTAT){
     newinds <- subset(inds, ndx)
 
     # set age of new individuals to zero
-    if (length(newinds) > 0) newinds$age <- 0
+    if (nrow(newinds) > 0) newinds$age <- 0
 
     ## resource consumption
     dN <- nrow(newinds)
@@ -56,11 +55,9 @@ times <- seq(0, 100, DELTAT)
 o <- data.frame(time=times[1], N=nrow(inds), S=S, maxage=max(inds$age))
 
 for (i in 2:length(times)) {
-
   state <- live(times[i], inds, S, parms, DELTAT)
   inds <- state$inds
   S    <- state$S
-
   ret <- c(time = times[i], N=nrow(inds), S=S, maxage=max(inds$age))
   o <- rbind(o, ret)
 }
