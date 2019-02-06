@@ -1,0 +1,299 @@
+---
+title: "Efficient ODE Models with rodeo"
+author: "Thomas Petzoldt"
+date: "2017-06-30, 2019-02-06"
+bibliography: rodeo.bib
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    #code_folding: hide
+---
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(echo = TRUE)
+library("deSolve") 
+library("shiny") 
+``` 
+
+Package **rodeo** [@Kneis2017;@rodeo2018]
+combines a series of complementary approaches to implement differential equation models 
+(currently ODEs and 1D PDEs) in an efficient way:
+
+1. The stoichiometry matrix notation ([Petersen matrix](https://en.wikipedia.org/wiki/Petersen_matrix))
+2. A code generator to generate **R** or **Fortran** code automatically
+3. Overhead-free access to forcing data from Fortran code,
+4. Syntax for one-dimensional models, built-in integrator, documentation support, ...
+
+
+A detailed description and tutorial can be found in the comprehensive [**rodeo package
+vignette**](https://CRAN.R-project.org/package=rodeo/vignettes/rodeoVignette.pdf)
+from [David Kneis](https://github.com/dkneis). The following example is served as a small teaser.
+
+## A Predator-prey example
+
+As a first example, we use a predator-prey model with 
+three differential equations of the following form:
+
+
+#### Resource (Substrate)
+$$\frac{dS}{dt} = s_{in}(t) - b \cdot S \cdot P + g \cdot K$$
+
+#### Prey (Producer)
+$$\frac{dP}{dt} = c \cdot S \cdot P - d \cdot K \cdot P$$  
+
+#### Predator (Consumer)
+$$\frac{dK}{dt} = e \cdot K \cdot P - f \cdot K$$
+
+
+This is intentionally very basic, but we can see already, that the
+equations are coupled. As an example, the term $K \cdot P$, i.e. the
+interaction between prey and predator, appears twice, as a loss in the
+prey equation and as a gain in the predator equation. Only the rate
+constants $d$ and $e$ are different. A similar connection exists
+between resource and prey.
+
+The obvious redundancy of terms (that can be much more complex for
+bigger models) can then be used to split the system of equations in
+two parts, a process vector and a stoichiometry matrix.
+
+These two parts are essentially tables and can be organised as
+.csv-format or even in Excel (or LibreOffice) worksheets.
+
+## Tabular model definition
+
+In the following, we load the required packages, **readxl** for
+reading the tables, **deSolve** for the numerical solution of the
+equations and **rodeo** that creates an **R** [@RCore2018] or **Fortran** code from
+this.  Package **rodeo** is implemented in the **R6** class system of
+**R**, we can see this from the `new` constructor and the dollar notation of the
+methods.
+
+```{r}
+library("readxl")
+library("deSolve")
+library("rodeo")
+```
+
+We load now the Excel tables to **R** and show its contents, but it is
+of course also a good idea to open the [`model.xlsx`](model.xlsx)-file directly.
+
+A typical **rodeo** model needs the following tables:
+
+* `vars` for the state variables, 
+* `pars` for the model parameters, 
+* `funs`for some helper functions and 
+* `stoi` for the stoichiometry matrix. 
+
+Tables `xstoi` and `forc` are optional and will be explained later. The last two 
+lines in the following code convert the list of tables in the appropriate format. They are not
+necessary if we import the tables from .csv instead of xlsx.
+
+```{r eval=TRUE, echo=TRUE}
+sheets <- c("vars", "pars", "funs", "pros", "stoi", "xstoi", "forc")
+
+## read the tables
+tables <- lapply(sheets, function(sheet) read_excel("model.xlsx", sheet = sheet))
+
+## convert from read_xl specific "tibble" class to data.frame
+tables <- lapply(tables, as.data.frame)
+names(tables) <- sheets
+```
+
+## Now, let's inspect the tables
+
+```{r eval=TRUE, echo=TRUE}
+tables$vars
+```
+
+
+```{r eval=TRUE, echo=TRUE}
+tables$pars
+```
+
+
+```{r eval=TRUE, echo=TRUE}
+tables$pros
+```
+
+The stoichiometry table can be given either datbase-like or as a cross
+table in matrix form.  Both notations have their pros and cons. While
+database tables (`stoi` format) contain less redundancy and are easier
+to annotate, the interactions between state variables and processes
+are easier to follow in the crosstabular notation.
+
+```{r eval=TRUE, echo=TRUE}
+tables$xstoi
+```
+
+## Code generation and compile
+
+Now we create the **rodeo** object by calling the constructor `new`
+with the given data frames from the `tables` list. The argument `dim=1`
+states that it is a box-model in 1 dimension, i.e. it is essentially
+zero dimensional.
+
+```{r, eval=TRUE, echo=TRUE}
+## create rodeo object
+model <- with(tables, 
+  rodeo$new(vars=vars, pars=pars, funs=funs, pros=pros, stoi=stoi, dim=1))
+```
+
+The same can also be done from the cross-tabular form (argument:
+`asMatrix`). We only need to make sure that the column names contain
+all state variables and the row names all corresponding processes.
+
+
+```{r eval=FALSE}
+xxstoi <- as.matrix(tables$xstoi[,-1])
+rownames(xxstoi) <- tables$xstoi[,1]
+model <- with(tables, 
+  rodeo$new(vars=vars, pars=pars, funs=funs, pros=pros, stoi=xxstoi, 
+            asMatrix=TRUE, dim=1)
+)
+```
+
+As said, the example shown here is intentionally basic. However, it shows 
+from the very beginning how to use external forcings, i.e. data read from an 
+external file (see [input.txt](input.txt)).
+
+```{r eval=TRUE, echo=TRUE, collapse=TRUE}
+tables$forc
+```
+
+Here `name` is the name of the function that can be used in the process
+vector, column is the column name in the file, mode is the
+interpolation mode. A negative value means linear interpolation.
+
+If such functions (and of course also corresponding files) exist, an
+appropriate Fortran module can be generated with `forcingFunctions`:
+
+```{r}
+fforc <- forcingFunctions(tables$forc)
+write(fforc, file = "forcings.f95")
+```
+
+Now we can compile the model, given that the R developer tools
+(**Rtools**) are installed.  A second source file `functions.f95`
+contains additional formal definitions and (optionally) user-provided
+functions written directly in Fortran. It is therefore user-editable,
+while other parts (forcings and some includes taken directly from the
+package) should be left untouched.
+
+```{r}
+ret <- model$compile(sources  = c("forcings.f95", "functions.f95"))
+```
+
+The result of the compilation process is now found in a temporary
+folder, depending on the type of the operating system. It can be
+located with `tempfile()`, and it is of course also possible to
+archive the compiled `.dll/.so` for later use, but that's another
+topic and is not covered here.
+
+## Model simulation
+
+Now we are ready to assign parameters (`setPars`) and initial values
+(`setVars`) to run the model. Both, `vars` and `pars`must be **named**
+numeric vectors. They can be either taken from optional columns of the
+Excel tables or assigned separately (see 2nd scenario).
+
+```{r}
+vars <- setNames(tables$vars$default, tables$vars$name)
+pars <- setNames(tables$pars$default, tables$pars$name)
+
+model$setPars(pars)
+model$setVars(vars)
+```
+
+The numerical solution is then carried out with function `dynamics` that calls an
+appropriate numerical solver from the **deSolve** [@Soetaert2010a;@Soetaert2010c] package. 
+Now, let's run some scenarios, a first scenario with the default
+parameter set:
+
+
+```{r, fig.height=3}
+out1 <- model$dynamics(seq(0, 200, 0.1))
+plot(out1, which=c("S", "P", "K"), mfrow=c(1,3))
+```
+
+... a second scenario with a user-supplied parameter vector:
+
+```{r, fig.height=3}
+pars <- c(S_in_def=0.1, b=0.1, c=0.1, d=0.1, e=0.1, f=0.1, g=0.0)
+model$setPars(pars)
+out2 <- model$dynamics(seq(0, 200, 0.1), method="bdf")
+plot(out2, which=c("S", "P", "K"), mfrow=c(1, 3))
+```
+
+... and finally a third scenario where the forcing data file
+[`input.txt`](input.txt) is enabled by setting the default value (`input_default`)
+to `NaN`. A model with external forcing is called a non-autonomous
+model. In such cases it is always a good idea to limit the step size
+by setting `hmax` to a value equal or smaller than the temporal
+resolution of the input data.
+
+```{r, fig.height=3}
+pars <- c(S_in_def=NaN, b=0.1, c=0.1, d=0.1, e=0.1, f=0.1, g=0.0)
+model$setPars(pars)
+out3 <- model$dynamics(seq(0, 200, 0.1), method="bdf_d", hmax=1)
+plot(out1, out2, out3, which=c("S", "P", "K"), mfrow=c(1,3))
+```
+
+## Controlling numerical precision
+
+The precistion of **deSolve** solutions is controlled with two optional arguments 
+`atol` and `rtol`. This is particular importance if scales of states differ, e.g. 
+if a resource is in the range of 0.0001 while the bacteria may have an abundance of $10^9$.
+
+As the table notation allows additional user-defined columns, individual 
+state-variable dependent tolerances can be easily set.
+
+```{r}
+pars <- c(S_in_def=NaN, b=0.1, c=0.1, d=0.1, e=0.1, f=0.1, g=0.0)
+model$setPars(pars)
+out4 <- model$dynamics(seq(0, 200, 0.1), method="bdf_d", hmax=1, 
+                       atol=tables$vars$atol, rtol=tables$vars$rtol)
+plot(out4)
+```
+
+
+
+## Documentation support
+
+The package contains several convenience functions, e.g. to visualize
+the stoichiometry matrix graphically or to export the parameter,
+variable, process and stoichiometry tables to Latex or HTML for
+documentation and publication.
+
+```{r}
+model$plotStoichiometry(box=1)
+```
+
+
+
+```{r}
+cat(exportDF(tables$pros[c("name", "unit", "expression", "tex")], tex=TRUE,
+         funCell=c(name=function(x){paste0("\\textit{",x,"}")},
+           tex=function(x){paste0("$",x,"$")})))
+```
+
+
+## Further reading
+
+O.k., this was a first round. More technical background can be found in @Kneis2017, in the package the help files and
+in the extensive [rodeo package
+vignette](https://CRAN.R-project.org/package=rodeo/vignettes/rodeoVignette.pdf).
+And last but not least a web-based shiny examples, e.g. for a  [shallow lake](http://limno-live.hydro.tu-dresden.de/models/shallowlake/) and [WebLAB](http://limno-live.hydro.tu-dresden.de/weblab/) demonstrate some more complex rodeo-models.
+
+
+## References
+
+<div id="refs"></div>
+
+----
+
+**Copyright and original author:** [tpetzoldt](https://github.com/tpetzoldt), `r Sys.Date()`
+
+
