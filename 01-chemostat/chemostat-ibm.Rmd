@@ -1,7 +1,8 @@
 ---
 title: "An individual-based model of a flow-through system"
 author: "Thomas Petzoldt"
-date: "2019-02-04"
+date: "`r Sys.Date()`"
+bibliography: chemostat.bib
 output:
   html_document:
     toc: true
@@ -16,6 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(simecol)
 library(plyr)
 library(ggplot2)
+set.seed(123)
 ```
 
 ## Introduction
@@ -23,12 +25,12 @@ library(ggplot2)
 Note: this is an interactive document. <span style="color:blue">Please
 use the `Hide` resp. `Code` buttons to fold or unfold the code of individual code cunks or
 of the complete document.</span> The content is best viewed with
-Chrome or Firefox.
+Chrome or Firefox. The code is written in the **R** programming language for statistical computing [@RCore2018].
 
 ## General approach
 
 Let's assume the following system of ordinary differential equations for a 
-flow-through bioreactor (chemostat), where $X$ is the concentration of organisms (e.g. cells/volume)
+flow-through bioreactor [chemostat, cf. @Novick1950;@Herbert1956], where $X$ is the concentration of organisms (e.g. cells/volume)
 in the system growing on a limited resource $S$ (e.g. nutrient/volume). The instantanaeous growth rate $r$ (1/time) depends 
 on a maximum growth rate $r_{max}$ and the resource concentration $S$ via a Monod 
 equation, with half-saturatio constant $k_s$.
@@ -97,7 +99,7 @@ The above implementation is extremely simple and may already serve as a starting
 point for extensions. However, almost all variables are held in global work space,
 which can become cumbersome and confusing when the application grows.
 
-Package **simecol** @Petzoldt2007 suggests an object oriented programming (OOP) 
+Package **simecol** [@Petzoldt2007] suggests an object oriented programming (OOP) 
 approach for such cases. In contrast to other OOP approaches for IBMs that model
 individuals as objects in their habitat, in an ecosystem and so forth, simecol "models
 the components of a simulation model". This is quite pragmatic and aims to make 
@@ -159,7 +161,7 @@ matplot(o$time, o[c("N", "S", "age")], xlab="time", ylab="N, S", type="l")
 As the IBM is a stochastic model, it would make sense to repeat it several times. 
 The following figure shows four independent simulation runs:
 
-```{r chem_2_5, eval=TRUE}
+```{r chem_2_5, eval=TRUE, cache=TRUE}
 par(mfrow=c(2,2), mar=c(4,3,1,1)+0.1)
 ret <- lapply(1:4, FUN=function(x) cbind(run=x, out(sim(ibm_test))))
 ret <- lapply(ret, function(o) matplot(o$time, o[c("N", "S")], xlab="time", ylab="N, S", type="l"))
@@ -167,7 +169,7 @@ ret <- lapply(ret, function(o) matplot(o$time, o[c("N", "S")], xlab="time", ylab
 
 ... and the next one shows the bandwidth of 50 simulations. 
 
-```{r chemostat_binned, fig.height=3}
+```{r chemostat_binned, fig.height=3, cache=TRUE}
 library(plyr)
 library(ggplot2)
 ret <- lapply(1:50, FUN=function(x) cbind(run=x, out(sim(ibm_test))))
@@ -192,7 +194,7 @@ This is, in principle, straightforward, one has only to make sure that all requi
 functions, data, and packages (here **simecol**) are transferred or loaded to 
 all respective worker **R** instances.
 
-```{r, equilibrium_multicore}
+```{r, equilibrium_multicore, cache=TRUE}
 library(parallel)
 
 observer(ibm_test) <- function(state, time, i, out, y) {
@@ -240,7 +242,12 @@ introduced.
 
 In case of interest and reasonable validation data, please let me know. Constructive comments are welcome.
 
+
+## References
+
+<div id="refs"></div>
+
 ----
 
-**Copyright and original author:** [tpetzoldt](https://github.com/tpetzoldt)
+**Copyright and original author:** [tpetzoldt](https://github.com/tpetzoldt), `r Sys.Date()`
 

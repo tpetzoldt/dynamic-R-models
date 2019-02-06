@@ -16,7 +16,8 @@ The example shows a chemostat model [cf. @Novick1950;@Herbert1956] by example of
 
 ## Implementation
 
-The system is solved numerically with solvers from package **deSolve** [@Soetaert2010a], while equilibria at infinite time are estimated with package **rootSolve** [@Soetaert2009]. The implementation follows the standard formulation of these packages, see package documentation of **deSolve** and **rootSolve**, and @Soetaert2010a or @Soetaert2010c for details.
+The system is solved numerically with solvers from package **deSolve** [@Soetaert2010a], while equilibria at infinite time are estimated with package **rootSolve** [@Soetaert2009]. The implementation follows the standard formulation of these packages, see package documentation of **deSolve** and **rootSolve**, and @Soetaert2010a or @Soetaert2010c for details. 
+The code is written in the **R** programming language for statistical computing [@RCore2018].
 
 ```{r, chemostat}
 library("deSolve")
