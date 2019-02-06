@@ -1,7 +1,8 @@
 ---
 title: "Differential Equation Model of a Chemostat"
 author: "Thomas Petzoldt"
-date: "February 2, 2019"
+date: "`r Sys.Date()`"
+bibliography: chemostat.bib
 output: html_document
 ---
 
@@ -11,11 +12,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-The example shows a chemostat model by example of autotrophic organisms (Algae, $X$), where growth is limited by a single nutrient (phosphorus, $P$) via a Monod equation.
+The example shows a chemostat model [cf. @Novick1950;@Herbert1956] by example of heterotrophic or autotrophic organisms (bacteria, algae, $X$), where growth is limited by a single nutrient (e.g. phosphorus, $P$) via a Monod equation.
 
 ## Implementation
 
-The system is solved numerically with solvers from package **deSolve** @Soetaert2010, while equilibria at infinite time are estimated with package **rootSolve** @Soetaert2009. The implementation follows the standard formulation of these packages, see package vignette and @Soetaert_rjournal for details.
+The system is solved numerically with solvers from package **deSolve** [@Soetaert2010a], while equilibria at infinite time are estimated with package **rootSolve** [@Soetaert2009]. The implementation follows the standard formulation of these packages, see package documentation of **deSolve** and **rootSolve**, and @Soetaert2010a or @Soetaert2010c for details.
 
 ```{r, chemostat}
 library("deSolve")
@@ -114,3 +115,12 @@ plot(D, X*P, type="l")
 ## Outlook
 
 The chemostat equations can serve as a starting point for further extensions, e.g. the production of specific substances in bioreactors, or additional trophical levels. The equations are the fundamental for the description of other technical or non-technical flow-through systems, up to waste water treatment plants, or lakes.
+
+
+## References
+
+<div id="refs"></div>
+
+----
+
+**Copyright and original author:** [tpetzoldt](https://github.com/tpetzoldt), `r Sys.Date()`
