@@ -1,0 +1,431 @@
+---
+title: "deSolve: Forcing functions and Events"
+author: "Karline Soetaert and Thomas Petzoldt"
+date: "`r Sys.Date()`"
+bibliography: ../bib/desolve.bib
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("deSolve")
+```
+
+## Introduction
+
+This short tutorial explains how differential equation models implemented in the **R** programming language for statistical computing [@RCore2018] and the add-on package **deSolve** [@Soetaert2010c;@Soetaert2010a] can be controlled by external input data.
+
+More about this can be found in the package documentation of  [**deSolve**](https://cran.r-project.org/package=deSolve) and in various papers and books that are referenced at the [deSolve home page](https://deSolve-r-forge.r-project.org).
+
+## Discontinuities in dynamic models
+
+Most solvers assume that dynamics is smooth. However, there can be several types of discontinuities:
+
+1. Non-smooth external variables
+2. Discontinuities in the derivatives
+3. Discontinuites in the values of the state variables
+
+A solver does not have large problems with first two types of
+discontinuities, but changing the values of state variables is much more
+difficult.
+
+External variables of the first type are also called "inputs" or forcing functions and `?forcings` opens the corresponding **deSolve** help page.
+
+
+**Why external variables?**
+
+Some important phenomena are not explicitly included in a differential equation model, but imposed as a time series. (e.g.
+sunlight, important for plant growth is rarely "modeled"). Somehow, during the integration, the model needs to know the
+value of the external variable at each time step.
+
+
+**Implementation of forcing functions in R**
+
+R has an ingenious function that is especially suited for this task: function `approxfun`. This function is typically used in two steps. First an interpolating function is constructed. Here `approxfun` is a function that returns another function, in our case `afun` that contains both, the interpolation algorithm and the data. This is done before solving the differential equation model.
+
+```{r, eval=FALSE}
+afun <- approxfun(data)
+```
+
+Then, within the derivative function, this interpolating function is called to
+provide the interpolated value at the requested time point (t):
+
+```{r, eval=FALSE}
+tvalue <- afun(t)
+```
+
+
+
+## Example: Predator-Prey model with time-varying input
+
+The following example uses a Lotka-Volterra-type predator-prey model with an additional
+state equation for a ressource $S$, e.g. a nutrient. This resource is consumed by the producer $P$ that is itself consumed by a consumer $C$. The resource does not regenerate itself, but it can be imported from an external source. The external
+input is described as a time dependent signal.
+
+**Step 1 Create an artificial time-series**
+
+```{r}
+times <- seq(0, 100, by = 0.1)
+signal <- data.frame(times = times, import = rep(0, length(times)))
+signal$import <- ifelse((trunc(signal$times) %% 2 == 0), 0, 1)
+signal[8:12,]
+```
+
+
+**Step 2: Create the interpolating function, using `approxfun`**
+
+```{r}
+input <- approxfun(signal, rule = 2)
+input(seq(from = 0.98, to = 1.01, by = 0.005))
+```
+
+**Step 3: Use the interpolation function in the ODE function**
+
+```{r}
+SPCmod <- function(t, x, parms) {
+  with(as.list(c(parms, x)), {
+    import <- input(t)   # <---- here
+    dS <- import - b * S * P + g * C
+    dP <- c * S * P - d * C * P
+    dC <- e * P * C - f * C
+    res <- c(dS, dP, dC)
+    list(res, signal = import)
+  })
+}
+parms <- c(b = 0.1, c = 0.1, d = 0.1, e = 0.1, f = 0.1, g = 0)
+xstart <- c(S = 1, P = 1, C = 1)
+```
+
+**Step 4: Solve the system and plot the result **
+
+```{r}
+out <- ode(y = xstart, times = times, func = SPCmod, parms)
+plot(out)
+```
+
+## Discontinuities in dynamic models: Events
+
+An event is when the values of state variables change abruptly. In most programming environments, 
+events are techically cumbersome, because when an event occurs, the simulation needs to be restarted.
+This can be done by chaining time periods in loops, but the resulting code can quickly become messy and difficult to read.
+
+The good news is, that package *deSolve** has a built-in event handling mechanism, 
+where events are part of a model, so that no restart will be necessary by the user.
+
+**Two different types of events in R**
+
+The event handling mechanism of **R/deSolve** can handle two different types of events:
+
+1. Events occur at known times
+    * Simple changes can be specified in a data.frame with:
+        * name of state variable that is affected
+        * the time of the event
+        * the magnitude of the event
+        * event method ("replace", "add", "multiply")
+    * More complex events can be specified in an event function that returns the 
+    changed values of the state variables `function(t, y, parms, ...)`
+2. Events occur when certain conditions are met:
+    * Event is triggered by a root function
+    * Event is specified in an event function
+
+The details are explained at the `?events` help page, but let us now show a small example.
+
+## Example: A patient gets injections of a drug in the blood
+
+The example describes is a typical pharmacokinetic problem. The aim is to follow the
+concentration of the drug in the blood and the tissue of the person over a relatively 
+long time (e.g. hours or days), but the injection takes only a few seconds. 
+One idea to model this would be a time dependent forcing variable for the drug. 
+
+This can work, but in most cases it will be very inefficient. The reason is, 
+that the simulation time step of the solver must always be shorter than the time step
+of an external discrete forcing function. Otherwise, the solver may jump over the
+the short time periof when the injection occurs. It is obvious that is not very clever to 
+simulate a model with resolution of seconds over several days, just to make sure that 
+a single injection is not overlooked.
+
+Events are a good solution for this problem. Then the ODE can be efficiently solved with a 
+(relatively long) automatic time step, and the event mechanism stops it when something
+important occurs.
+
+**Problem Formulation**
+
+The model consists then of two parts:
+
+1. an ODE model for the dynamics between the events
+    * the initial drug concentration is zero
+    * if a drug is present, it decays with rate $b$
+2. an event for the injection
+    * if an injection occurs, the state variable $blood$ is directly changed
+    
+
+
+**ODE model of 1st order drug decay:**
+
+```{r}
+pharmaco <- function(t, blood, p) {
+  dblood <- - b * blood
+  list(dblood)
+}
+b <- 0.6
+yini <- c(blood = 0)
+```
+
+**The event function**
+
+The events can be specified in an event data.frame, containing the state variable that is to be manipulated (`blood`),
+the time steps, when the events occur (`time`), the amount of change (`value`) and the method, how the
+state variable is changed, for example:
+
+* Daily doses, at same time of day
+* Injection makes the concentration in the blood increase by 40 units.
+
+```{r}
+injectevents <- data.frame(var = "blood",
+                          time = 0:20,
+                         value = 40,
+                        method = "add")
+head(injectevents)
+```
+
+**Solve the model**
+
+* Pass events to the solver in a list
+* All solvers in **deSolve** can handle events
+* Here we use the "implicit Adams" method
+
+```{r}
+times <- seq(from = 0, to = 10, by = 1/24)
+outDrug <- ode(func = pharmaco, times = times, y = yini,
+  parms = NULL, method = "impAdams",
+  events = list(data = injectevents))
+```
+
+**Plot the result**
+
+```{r}
+plot(outDrug)
+```
+
+
+## Example 2: An event triggered by a root: A bouncing ball
+
+**Problem formulation**
+
+* A ball is thrown vertically from the ground: $y(0) = 0$
+* Initial velocity: $y' = 10 m s^{-1}$; acceleration $g = 9.8 m s^{-2}$
+* When ball hits the ground, it bounces.
+
+
+**ODEs describe height of the ball above the ground (y)**
+
+The ODEs can be specified as 2nd order ODE .....
+
+$$
+\begin{align}
+y'' &= -g  \\
+y(0) &= 0 \\
+y'(0) &= 10
+\end{align}
+$$
+
+To solve a 2nd order ODE numerically, it is first transformed to a system of two 1st order ODEs by 
+substituting $y'$ with $y_2$. This forms than the following 1st order ODE:
+
+$$
+\begin{align}
+y_1' &= y_2  \\
+y_2' &= -g  \\
+y1(0) &= 0 \\
+y2(0) &= 10
+\end{align}
+$$
+
+
+
+**Dynamics inbetween events**
+
+```{r}
+library(deSolve)
+ball <- function(t, y, parms) {
+  dy1 <- y[2]
+  dy2 <- -9.8
+  list(c(dy1, dy2))
+}
+yini <- c(height = 0, velocity = 10)
+```
+
+
+**The Ball hits the ground and bounces**
+
+The root event occurs if the ball hits the ground:
+
+* The ground is where height = 0
+* The root function is 0 when $y_1$ = 0
+
+```{r}
+rootfunc <- function(t, y, parms) return (y[1])
+```
+
+
+**Event: the ball bounces**
+
+* The velocity changes sign (-) and is reduced by 10%
+* Event function returns changed values of both state variables
+
+
+```{r}
+eventfunc <- function(t, y, parms) {
+  y[1] <- 0
+  y[2] <- -0.9*y[2]
+  return(y)
+}
+```
+
+
+**Solve the model**
+
+* Inform solver that event is triggered by root (root = TRUE)
+* Pass event function to solver
+* Pass root function to solver
+
+```{r}
+times <- seq(from = 0, to = 20, by = 0.01)
+out <- ode(times = times, y = yini, func = ball,
+parms = NULL, rootfun = rootfunc,
+events = list(func = eventfunc, root = TRUE))
+```
+
+
+**Get information about the root (hitting the ground)**
+
+```{r}
+attributes(out)$troot
+```
+
+**Plot results**
+
+```{r}
+plot(out, select = "height")
+```
+
+**Create movie-like output**
+
+```{r, eval=FALSE}
+for (i in seq(1, 2001, 10)) {
+  plot(out, which = "height", type = "l", lwd = 1,
+       main = "", xlab = "Time", ylab = "Height"
+  )
+  points(t(out[i,1:2]), pch = 21, lwd = 1, col = 1, cex = 2,
+         bg = rainbow(30, v = 0.6)[20-abs(out[i,3])+1])
+  Sys.sleep(0.01)
+}
+```
+
+* try this yourself!
+
+## Exercise: Add events to a logistic equation
+
+The logistic equation is a fundamental theoretical and sometimes also practical model, where population growth is described by a population growth rate $r$ and a carrying capacity $K$. It is the origin of the well-known terms "r strategists" and "K strategists".
+
+**ODE: logistic equation of population growth**
+
+$$
+y' = r\cdot y \cdot (1-\frac{y}{K})
+$$
+
+with $r=1$, $K=10$ and $y_0=2$
+
+**Events: the population is harvested according to several strategies**
+
+1. No harvesting
+2. Every 2 days the population's density is reduced to 50%
+3. When the population approaches 80% of its carrying capacity, its density is halved.
+
+### Tasks:
+
+* Run the model for 20 days
+* Implement first strategy in a data.frame
+* Second strategy requires root and event function
+
+Use the code fragment from the next pake as a template.
+
+**Template**
+
+Copy the template in your favorite editor (e.g. RStudio) and fill the gaps.
+
+```{r, eval=FALSE}
+## =============================================================================
+## Logistic growth with harvesting
+## =============================================================================
+require(deSolve)
+
+derivs <- function(t, y, parms) 
+  list(r * y * (1-y/K))
+
+r <- 1 
+K <- 10
+yini <- c(y = 2)
+times <- seq(from = 0, to = 20, by = 0.1)
+
+## =============================================================================
+# First run: unharvested
+## =============================================================================
+out1 <- ode(y = yini, times = times, func = derivs, parms = NULL)
+
+## =============================================================================
+# Second run: harvest at preset times
+## =============================================================================
+
+## ****  Fill in this part:  ******
+
+harvest <- data.frame( 
+                    var =   , # what is the name of the variable, 
+                    time =  , # at which times do the events occur,
+                    value = , # what is the value 
+                    method = )# what is the method used ("multiply", "add", ...)
+
+out2 <- ode(y = yini, times = times, func = derivs, parms = NULL,
+            events = list(data = harvest))
+
+## =============================================================================
+# Third run: harvest when critical density is readhed
+## =============================================================================
+
+rootfunc  <- function(t, y, p) 
+#  **** Fill in this part:   a root is when y = 0.8*K ****
+  return( )
+
+eventfunc <- function(t, y, p) 
+# **** Fill in this part:  variable y is reduced with 50%  ****
+  return( )
+
+out3 <- ode(y = yini, times = times, func = derivs, parms = NULL,
+            rootfun = rootfunc, events = list(func = eventfunc, root = TRUE))
+
+## =============================================================================
+# Plot different scenarios
+## =============================================================================
+
+plot(out1, out2, out3, lwd = 2, col = "black")
+legend ("bottomright", lwd = 2, lty = 1:3,
+    legend = c("unharvested", "2-day harvest", "harvest at 80% of K"))
+```
+
+
+
+## References
+
+<div id="refs"></div>
+
+----
+
+**Copyright and original author:** [tpetzoldt](https://github.com/tpetzoldt), `r Sys.Date()`
+
+
