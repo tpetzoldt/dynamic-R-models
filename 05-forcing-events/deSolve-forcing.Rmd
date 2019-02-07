@@ -113,7 +113,7 @@ plot(out)
 
 An event is a discontinuity in a dynamic model, when the values of state variables change abruptly. In most programming environments, 
 events are techically cumbersome, because when an event occurs, the simulation needs to be restarted.
-This can be done by chaining time periods in loops, but the resulting code can quickly become messy and difficult to read.
+This can be done by chaining seperate simulations in loops, but the resulting code can quickly become messy and difficult to read.
 
 The good news is, that package *deSolve** has a built-in event handling mechanism, 
 where events are part of a model, so that no restart will be necessary by the user.
@@ -150,7 +150,7 @@ the short time periof when the injection occurs. It is obvious that is not very 
 simulate a model with resolution of seconds over several days, just to make sure that 
 a single injection is not overlooked.
 
-Events are a good solution for this problem. Then the ODE can be efficiently solved with a 
+Events are a better appraoch for this problem. Then the ODE can be efficiently solved with a 
 (relatively long) automatic time step, and the event mechanism stops it when something
 important occurs.
 
@@ -197,7 +197,7 @@ head(injectevents)
 **Solve the model**
 
 * Pass events to the solver in a list
-* All solvers in **deSolve** can handle events
+* All solvers of **deSolve** can handle events
 * Here we use the "implicit Adams" method
 
 ```{r}
@@ -219,13 +219,14 @@ plot(outDrug)
 **Problem formulation**
 
 * A ball is thrown vertically from the ground: $y(0) = 0$
-* Initial velocity: $y' = 10 m s^{-1}$; acceleration $g = 9.8 m s^{-2}$
+* Initial velocity: $y' = 10 \mathrm m s^{-1}$; acceleration $g = 9.8 \mathrm m s^{-2}$
 * When ball hits the ground, it bounces.
 
 
 **ODEs describe height of the ball above the ground (y)**
 
-The ODEs can be specified as 2nd order ODE .....
+The ODEs can be specified as 2nd order ODE, where $y$ ($\mathrm m$) is the height above 
+ground, $y'$ ($\mathrm m s^{-1}$) is the velocity and $y''$ ($\mathrm m s^{-2}$) is the acceleration:
 
 $$
 \begin{align}
@@ -236,7 +237,7 @@ y'(0) &= 10
 $$
 
 To solve a 2nd order ODE numerically, it is first transformed to a system of two 1st order ODEs by 
-substituting $y'$ with $y_2$. This forms than the following 1st order ODE:
+substituting $y'$ with $y_2$. This forms then the following 1st order ODE:
 
 $$
 \begin{align}
@@ -276,7 +277,7 @@ rootfunc <- function(t, y, parms) return (y[1])
 
 **Event: the ball bounces**
 
-* The velocity changes sign (-) and is reduced by 10%
+* The velocity changes its sign (-) and is reduced by 10%
 * Event function returns changed values of both state variables
 
 
@@ -328,7 +329,6 @@ for (i in seq(1, 2001, 10)) {
 }
 ```
 
-* try this yourself!
 
 ## Exercise: Add events to a logistic equation
 
@@ -336,8 +336,10 @@ The logistic equation is a fundamental theoretical and sometimes also practical 
 
 **ODE: logistic equation of population growth**
 
+Let's assume the following logistic equation:
+
 $$
-y' = r\cdot y \cdot (1-\frac{y}{K})
+y' = r\cdot y \cdot \left(1-\frac{y}{K}\right)
 $$
 
 with $r=1$, $K=10$ and $y_0=2$
@@ -351,10 +353,10 @@ with $r=1$, $K=10$ and $y_0=2$
 **Tasks**
 
 * Run the model for 20 days
-* Implement first strategy in a data.frame
-* Second strategy requires root and event function
+* Implement the first strategy in a `data.frame`
+* Second strategy: requires root and event function
 
-Use the code fragment from the next pake as a template.
+Use the code fragment below as a template.
 
 **Template**
 
