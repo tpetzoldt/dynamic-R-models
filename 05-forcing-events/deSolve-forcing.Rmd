@@ -62,7 +62,7 @@ tvalue <- afun(t)
 
 
 
-## Example: Predator-Prey model with time-varying input
+## Example 1: Time-varying input
 
 The following example uses a Lotka-Volterra-type predator-prey model with an additional
 state equation for a ressource $S$, e.g. a nutrient. This resource is consumed by the producer $P$ that is itself consumed by a consumer $C$. The resource does not regenerate itself, but it can be imported from an external source. The external
@@ -109,9 +109,9 @@ out <- ode(y = xstart, times = times, func = SPCmod, parms)
 plot(out)
 ```
 
-## Discontinuities in dynamic models: Events
+## Events
 
-An event is when the values of state variables change abruptly. In most programming environments, 
+An event is a discontinuity in a dynamic model, when the values of state variables change abruptly. In most programming environments, 
 events are techically cumbersome, because when an event occurs, the simulation needs to be restarted.
 This can be done by chaining time periods in loops, but the resulting code can quickly become messy and difficult to read.
 
@@ -136,7 +136,7 @@ The event handling mechanism of **R/deSolve** can handle two different types of 
 
 The details are explained at the `?events` help page, but let us now show a small example.
 
-## Example: A patient gets injections of a drug in the blood
+## Example 2: A patient gets injections in the blood
 
 The example describes is a typical pharmacokinetic problem. The aim is to follow the
 concentration of the drug in the blood and the tissue of the person over a relatively 
@@ -214,7 +214,7 @@ plot(outDrug)
 ```
 
 
-## Example 2: An event triggered by a root: A bouncing ball
+## Example 3: An event triggered by a root: A bouncing ball
 
 **Problem formulation**
 
@@ -348,7 +348,7 @@ with $r=1$, $K=10$ and $y_0=2$
 2. Every 2 days the population's density is reduced to 50%
 3. When the population approaches 80% of its carrying capacity, its density is halved.
 
-### Tasks:
+**Tasks**
 
 * Run the model for 20 days
 * Implement first strategy in a data.frame
