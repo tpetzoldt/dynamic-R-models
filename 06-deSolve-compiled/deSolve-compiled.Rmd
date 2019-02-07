@@ -1,0 +1,234 @@
+---
+title: 'deSolve: Use of Compiled Code'
+author: "Karline Soetaert and Thomas Petzoldt"
+date: "`r Sys.Date()`"
+bibliography: desolve.bib
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("deSolve")
+```
+
+
+## Introduction
+
+The implementation of differential equation models directly in **R** [@RCore2018] is ideal for the development of dynamic models, because everything can be immediately tested and the whole infrastructure of **R** can be used. However, this adds considerable overhead, especially due to the automatic checking and type conversion of **R**, so that models cannot run with unlimited performance in this mode.
+
+Fortunately, there is a way to unlock the handbreake. Both **R** in general and package **deSolve** [@Soetaert2010c;@Soetaert2010a] in particular allow to write time-critical parts in a so-called compiled language, e.g. Fortran or C/C++. Then, all solvers of **deSolve** allow direct communication between solvers and a compiled model on the machine code level, while keeping R's facilities for data management and visualisation. Details are described in the package vignette [$\rightarrow$ compiledCode](https://CRAN.R-project.org/package=deSolve/vignettes/compiledCode.pdf) of **deSolve** while the short tutorial here serves as a quick introduction.
+
+**General principle**
+
+* Implement core model (and only this) in C or Fortran,
+* Use data handling, storage and plotting facilities of **R**.
+
+**R** starts the solver with the compiled model, both communicate directly without the overhead of calling back to **R** and finally the return the results tu the **R** level where it is accessible by the user.
+
+## The Lorenz system in pure R
+
+```{r}
+library(deSolve)
+library(scatterplot3d)
+
+Lorenz <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)), {
+    dX <- a * X + Y * Z
+    dY <- b * (Y - Z)
+    dZ <- -X * Y + c * Y - Z
+    list(c(dX, dY, dZ))
+  })
+}
+
+parameters <- c(a = -8/3, b = -10, c =  28)
+state <- c(X = 1, Y = 1, Z = 1)
+times <- seq(0, 100, by = 0.01)
+
+out <- ode(y = state, times = times, func = Lorenz, parms = parameters)
+
+plot(out)
+scatterplot3d(out[,-1], type="l")
+```
+
+
+## The Lorenz system in C
+
+
+```{r engine="c", eval=FALSE}
+/* file lorenz.c */
+#include <R.h>
+static double parms[3];
+#define a parms[0]
+#define b parms[1]
+#define c parms[2]
+
+/* initializer  */
+void initmod(void (* odeparms)(int *, double *)) {
+    int N = 3;
+    odeparms(&N, parms);
+}
+
+/* Derivatives */
+void derivs (int *neq, double *t, double *y, double *ydot,
+             double *yout, int *ip) {
+    ydot[0] = a * y[0] + y[1] * y[2];
+    ydot[1] = b * (y[1] - y[2]);
+    ydot[2] = - y[0] * y[1] + c * y[1] - y[2];
+} 
+```
+
+
+### Compile the model
+
+* needs compilers (RTools) installed and in the systems' search path
+
+```{r}
+system("R CMD SHLIB lorenzc.c")
+```
+
+
+### Call the model from R
+
+```{r}
+library(deSolve)
+library(scatterplot3d)
+dyn.load("lorenzc.dll")
+
+out <- ode(state, times, func = "derivs", parms = parameters,
+  dllname = "lorenzc", initfunc = "initmod")
+
+dyn.unload("lorenzc.dll")
+
+plot(out)
+scatterplot3d(out[,-1], type="l")
+```
+
+Don't forget to `dyn.unload` the model afterwards, otherwise the DLL will remain 
+locked and cannot be overwritten in a next compiler run.
+
+
+## The Lorenz system in Fortran
+
+
+<!---
+
+Note:
+
+Rmarkdown is capable to call fortran and c code directly from the code chunks, 
+so it is (theoretically and practically) not necessary to have the c/fortran files 
+on the hard disc. It then compiles it to a temprary dll 
+(with a cryptic random file name) and loads this directly.
+
+I don't use this here, intentionally. T.P.
+--->
+
+
+```{r, engine="fortran", eval=FALSE}
+c file lorenz.f
+       subroutine initmod(odeparms)
+         external odeparms
+         double precision parms(3)
+         common /myparms/parms
+
+         call odeparms(3, parms)
+         return
+       end
+
+       subroutine derivs (neq, t, y, ydot, yout, ip)
+         double precision t, y, ydot, a, b, c
+         integer neq, ip(*)
+         dimension y(3), ydot(3), yout(*)
+         common /myparms/a,b,c
+
+         ydot(1) = a * y(1) + y(2) * y(3)
+         ydot(2) = b * (y(2) - y(3))
+         ydot(3) = -y(1) * y(2) + c * y(2) - y(3)
+
+        return
+       end
+```
+
+
+### Compile the model
+
+* needs compilers (Rtools) installed and in the systems' search path
+* this is quite standard on Linux, whereas Windows users have to download the [Rtools](https://cran.r-project.org/bin/windows/Rtools/) separately.
+
+```{r}
+system("R CMD SHLIB lorenzf.f")
+```
+
+
+### Call the model from R
+
+```{r}
+dyn.load("lorenzf.dll")
+
+out <- ode(state, times, func = "derivs", parms = parameters,
+  dllname = "lorenzf", initfunc = "initmod")
+
+dyn.unload("lorenzf.dll")
+
+plot(out)
+scatterplot3d(out[,-1], type="l")
+```
+
+Don't forget to unload the model afterwards, otherwise the DLL will remain 
+locked and cannot be overwritten in a next compiler run.
+
+## Benchmark
+
+Run the 3 versions (R, C, Fortran) several times in an R script and make a benchmark.
+
+```{r eval=FALSE}
+library(deSolve)
+library(scatterplot3d)
+
+## put the pure R model here
+
+## compile the C code
+system("R CMD SHLIB lorenzc.c")
+
+## compile the fortran code
+system(..............)
+
+## load the DLLs (note .so on Linux)
+dyn.load("lorenzc.dll")
+dyn.load(............)
+
+## run the R model 10 (or 100) times
+system.time(
+  for(i in 1:10) out   <- ode(state, times, Lorenz, parms = parameters)
+)
+
+## run the C model 10 (or 100) times
+..............
+
+## run the Fortran model 10 (or 100) times
+..............
+
+## don't forget to unload the DLLs (.so on Linux)
+dyn.unload("lorenzc.dll")
+dyn.unload("lorenzf.dll")
+```
+
+## Outlook
+
+More can be found in the package vignette [compiledCode](https://CRAN.R-project.org/package=deSolve/vignettes/compiledCode.pdf) or in the paper of @Soetaert2010a. In addition to this, compiled differential equation models are also supported by other packages like **cOde** and **dMod** [@Kaschek2018;@Kaschek2018b] or **rodeo**  [@Kneis2017;@rodeo2018].
+
+
+
+## References
+
+<div id="refs"></div>
+
+----
+
+**Copyright and original author:** [tpetzoldt](https://github.com/tpetzoldt), `r Sys.Date()`
+
