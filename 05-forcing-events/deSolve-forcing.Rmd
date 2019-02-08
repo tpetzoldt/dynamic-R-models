@@ -2,7 +2,7 @@
 title: "deSolve: Forcing functions and Events"
 author: "Karline Soetaert and Thomas Petzoldt"
 date: "`r Sys.Date()`"
-bibliography: ../bib/desolve.bib
+bibliography: desolve.bib
 output:
   html_document:
     toc: true
