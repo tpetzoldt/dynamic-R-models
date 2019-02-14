@@ -1,7 +1,7 @@
 ---
 title: "Efficient ODE Models with rodeo"
 author: "Thomas Petzoldt"
-date: "2017-06-30, 2019-02-06"
+date: "2017-06-30, 2019-02-14"
 bibliography: rodeo.bib
 output:
   html_document:
@@ -23,9 +23,9 @@ combines a series of complementary approaches to implement differential equation
 (currently ODEs and 1D PDEs) in an efficient way:
 
 1. The stoichiometry matrix notation ([Petersen matrix](https://en.wikipedia.org/wiki/Petersen_matrix))
-2. A code generator to generate **R** or **Fortran** code automatically
+2. A code generator to generate **R** or **Fortran** code from the tabular notation
 3. Overhead-free access to forcing data from Fortran code,
-4. Syntax for one-dimensional models, built-in integrator, documentation support, ...
+4. Syntax for one-dimensional models, built-in integrator, documentation support.
 
 
 A detailed description and tutorial can be found in the comprehensive [**rodeo package
