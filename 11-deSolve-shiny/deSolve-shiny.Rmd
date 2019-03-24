@@ -21,13 +21,11 @@ library("shiny")
 ## - or started from a remote server (limno-live)
 ```
 
-<!-- 
-<span style="color:red">Under construction: the embedded shiny apps don't 
-show up yet here, because Github blocks embedded iframes from non-encrypted (i.e. http 
-instead of https) connections.</span> Please use 
+
+<span style="color:red">Under construction: the embedded shiny apps often don't show up on Github.</span> Please use 
 [**this link**](https://weblab01.hydro.tu-dresden.de/tutorials/deSolve-shiny.html) 
 as a temporary work around.
--->
+
 
 ## Introduction
 
