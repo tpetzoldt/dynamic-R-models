@@ -25,7 +25,7 @@ library("shiny")
 <span style="color:red">Under construction: the embedded shiny apps don't 
 show up yet here, because Github blocks embedded iframes from non-encrypted (i.e. http 
 instead of https) connections.</span> Please use 
-[**this link**](http://limno-live.hydro.tu-dresden.de/tutorials/deSolve-shiny.html) 
+[**this link**](https://weblab01.hydro.tu-dresden.de/tutorials/deSolve-shiny.html) 
 as a temporary work around.
 -->
 
@@ -153,7 +153,7 @@ substances `A` and `B`) and then plots the time series of the model.
 ### A first approach
 
 ```{r results='asis', echo=FALSE}
-cat('<iframe src="http://limno-live.hydro.tu-dresden.de/apps/bruss01" style="border: none; width: 75%; height: 500px" />\n')
+cat('<iframe src="https://weblab01.hydro.tu-dresden.de/apps/bruss01/" style="border: none; width: 75%; height: 500px" />\n')
 ```
 
 The code is stunningly simple, consisting of three parts:
@@ -190,7 +190,7 @@ HTML tags like `h2`, `h3`, or `p` can be used to annotate the app, see
 help pages for more.
 
 ```{r results='asis', echo=FALSE}
-cat('<iframe src="http://limno-live.hydro.tu-dresden.de/apps/bruss02" style="border: none; width: 100%; height: 800px" />\n')
+cat('<iframe src="https://weblab01.hydro.tu-dresden.de/apps/bruss02/" style="border: none; width: 100%; height: 800px" />\n')
 ```
 
 
@@ -229,12 +229,12 @@ needed by a call to `numericInput`, including some constant optional
 values like the `witdh` of the input field.  The templates stored in
 these lists are then expanded with `lapply` and `do.call`.  The result
 is exacly the same as befors, compare:
-http://limno-live.hydro.tu-dresden.de/apps/bruss03
+https://weblab01.hydro.tu-dresden.de/apps/bruss03
 
 
 <!---
 ```{r results='asis', brusselator_3}
-cat('<iframe src="http://limno-live.hydro.tu-dresden.de/apps/bruss03" style="border: none; width: 1024px; height: 800px" />\n')
+cat('<iframe src="https://weblab01.hydro.tu-dresden.de/apps/bruss03/" style="border: none; width: 1024px; height: 800px" />\n')
 ```
 --->
 
@@ -314,11 +314,11 @@ knitr::read_chunk("bruss04/app.R")
 The result looks identical as before, just a little bit faster.
 
 ```{r results='asis', echo=FALSE}
-cat('<iframe src="http://limno-live.hydro.tu-dresden.de/apps/bruss04" style="border: none; width: 100%; height: 800px" />\n')
+cat('<iframe src="https://weblab01.hydro.tu-dresden.de/apps/bruss04/" style="border: none; width: 100%; height: 800px" />\n')
 ```
 
 
-If you want to see the C code: [here is it](http://limno-live.hydro.tu-dresden.de/tutorials/brusselator.c.txt)
+If you want to see the C code: [here is it](https://github.com/tpetzoldt/dynamic-R-models/tree/master/11-deSolve-shiny/bruss04)
 
 ## Further reading
 
