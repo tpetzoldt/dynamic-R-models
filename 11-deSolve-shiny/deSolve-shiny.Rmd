@@ -23,7 +23,7 @@ library("shiny")
 
 
 <span style="color:red">Under construction: the embedded shiny apps often don't show up on Github.</span> Please use 
-[**this link**](https://weblab01.hydro.tu-dresden.de/tutorials/deSolve-shiny.html) 
+[**this link**](https://weblab.hydro.tu-dresden.de/tutorials/deSolve-shiny.html) 
 as a temporary work around.
 
 
@@ -151,7 +151,7 @@ substances `A` and `B`) and then plots the time series of the model.
 ### A first approach
 
 ```{r results='asis', echo=FALSE}
-cat('<iframe src="https://weblab01.hydro.tu-dresden.de/apps/bruss01/" style="border: none; width: 75%; height: 500px" />\n')
+cat('<iframe src="https://weblab.hydro.tu-dresden.de/apps/bruss01/" style="border: none; width: 75%; height: 500px" />\n')
 ```
 
 The code is stunningly simple, consisting of three parts:
@@ -188,7 +188,7 @@ HTML tags like `h2`, `h3`, or `p` can be used to annotate the app, see
 help pages for more.
 
 ```{r results='asis', echo=FALSE}
-cat('<iframe src="https://weblab01.hydro.tu-dresden.de/apps/bruss02/" style="border: none; width: 100%; height: 800px" />\n')
+cat('<iframe src="https://weblab.hydro.tu-dresden.de/apps/bruss02/" style="border: none; width: 100%; height: 800px" />\n')
 ```
 
 
@@ -227,12 +227,12 @@ needed by a call to `numericInput`, including some constant optional
 values like the `witdh` of the input field.  The templates stored in
 these lists are then expanded with `lapply` and `do.call`.  The result
 is exacly the same as befors, compare:
-https://weblab01.hydro.tu-dresden.de/apps/bruss03
+https://weblab.hydro.tu-dresden.de/apps/bruss03
 
 
 <!---
 ```{r results='asis', brusselator_3}
-cat('<iframe src="https://weblab01.hydro.tu-dresden.de/apps/bruss03/" style="border: none; width: 1024px; height: 800px" />\n')
+cat('<iframe src="https://weblab.hydro.tu-dresden.de/apps/bruss03/" style="border: none; width: 1024px; height: 800px" />\n')
 ```
 --->
 
@@ -312,7 +312,7 @@ knitr::read_chunk("bruss04/app.R")
 The result looks identical as before, just a little bit faster.
 
 ```{r results='asis', echo=FALSE}
-cat('<iframe src="https://weblab01.hydro.tu-dresden.de/apps/bruss04/" style="border: none; width: 100%; height: 800px" />\n')
+cat('<iframe src="https://weblab.hydro.tu-dresden.de/apps/bruss04/" style="border: none; width: 100%; height: 800px" />\n')
 ```
 
 
