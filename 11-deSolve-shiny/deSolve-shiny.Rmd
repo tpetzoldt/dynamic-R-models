@@ -22,9 +22,9 @@ library("shiny")
 ```
 
 
-<span style="color:red">Under construction: the embedded shiny apps often don't show up on Github.</span> Please use 
+<span style="color:red">Note: sometimes, the embedded shiny apps don't show up on Github.</span> Please use 
 [**this link**](https://weblab.hydro.tu-dresden.de/tutorials/deSolve-shiny.html) 
-as a temporary work around.
+as a temporary work around in such cases.
 
 
 ## Introduction
@@ -226,7 +226,7 @@ one for the parameters `L_parms` and one for the initial values
 needed by a call to `numericInput`, including some constant optional
 values like the `witdh` of the input field.  The templates stored in
 these lists are then expanded with `lapply` and `do.call`.  The result
-is exacly the same as befors, compare:
+is exacly the same as before, compare:
 https://weblab.hydro.tu-dresden.de/apps/bruss03
 
 
