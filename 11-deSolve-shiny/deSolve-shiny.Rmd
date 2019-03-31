@@ -265,7 +265,7 @@ depending on the type of model.
 Several approaches were developed, depending on model complexity and
 your skills:
 
-* write it your model ``by hand'' in Fortran or C
+* write your model ``by hand'' in Fortran or C
 * use a code generator:
     * package **ccSolve** from Karline Soetaert (from Github)
     * package **cOde ** from David Kaschek for smaller models
