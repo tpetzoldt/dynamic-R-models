@@ -33,11 +33,8 @@ nutrients <- seq(0.001, 2, length = 200)
 #  restoration    <- sapply(nutrients, equilibrium, A0 = 1.5)
 #})
 
-
 ## parallelised version; set number of cores to 1, 2, 4, 8, ...
 cl <- makeCluster(getOption("cl.cores", 4))
-#cl <- makePSOCKcluster(c("user-pc", "hhb-12-01"))
-#cl <- makePSOCKcluster(c("user-pc"))
 
 system.time({
   eutrophication <- unlist(parLapply(cl, nutrients, equilibrium, A0 = 0.1))
