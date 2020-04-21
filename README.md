@@ -8,6 +8,5 @@ Please see packages [**deSolve**](https://cran.r-project.org/package=deSolve), [
 Some of the examples are in .Rmd (R markdown) format, from which HTML-web-documents can be compiled. See https://tpetzoldt.github.io for compiled versions.
 
 
-Questions and suggestions can be sent to the public R Dynamic Modeling Mailing list:
-
+Questions and suggestions can be posted to [StackOverflow](https://stackoverflow.com/) or sent the public R Dynamic Modeling Mailing list:
 https://stat.ethz.ch/mailman/listinfo/r-sig-dynamic-models
