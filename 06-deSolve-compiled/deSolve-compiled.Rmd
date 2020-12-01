@@ -26,10 +26,10 @@ Fortunately, there is a way to unlock the handbreake. Both **R** in general and 
 
 **General principle**
 
-* Implement core model (and only this) in C or Fortran,
+* Implement the core model (and only this) in C or Fortran,
 * Use data handling, storage and plotting facilities of **R**.
 
-**R** starts the solver with the compiled model, both communicate directly without the overhead of calling back to **R** and finally the return the results tu the **R** level where it is accessible by the user.
+**R** starts the solver with the compiled model, both communicate directly without the overhead of calling back to **R**, and finally the solver returns the results tu the **R** level where it is accessible by the user. We start with a model in pure **R* and then show compiled versions.
 
 ## The Lorenz system in pure R
 
@@ -117,7 +117,6 @@ locked and cannot be overwritten in a next compiler run.
 
 
 <!---
-
 Note:
 
 Rmarkdown is capable to call fortran and c code directly from the code chunks, 
