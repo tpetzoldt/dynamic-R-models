@@ -21,7 +21,7 @@ library("deSolve")
 
 This short tutorial explains how differential equation models implemented in the **R** programming language for statistical computing [@RCore2018] and the add-on package **deSolve** [@Soetaert2010c;@Soetaert2010a] can be controlled by external input data.
 
-More about this can be found in the package documentation of  [**deSolve**](https://cran.r-project.org/package=deSolve) and in various papers and books that are referenced at the [deSolve home page](https://deSolve-r-forge.r-project.org).
+More about this can be found in the package documentation of  [**deSolve**](https://cran.r-project.org/package=deSolve) and in various papers and books that are referenced at the [deSolve home page](https://deSolve.r-forge.r-project.org).
 
 ## Discontinuities in dynamic models
 
