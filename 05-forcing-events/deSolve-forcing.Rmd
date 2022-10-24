@@ -397,7 +397,7 @@ out2 <- ode(y = yini, times = times, func = derivs, parms = NULL,
             events = list(data = harvest))
 
 ## =============================================================================
-# Third run: harvest when critical density is readhed
+# Third run: harvest when critical density is reached
 ## =============================================================================
 
 rootfunc  <- function(t, y, p) 
