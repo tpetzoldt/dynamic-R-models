@@ -1907,22 +1907,41 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </header>
 
 
+<section id="about-webr-and-this-example" class="level2">
+<h2 class="anchored" data-anchor-id="about-webr-and-this-example">1. About webR and this example</h2>
+<p><strong>What is webR?</strong> <a href="https://docs.r-wasm.org/webr/latest/">webR</a> is a version of the R interpreter compiled to WebAssembly, that runs entirely in the web browser — no server, no installation, no R setup required. It allows to run R code, load packages, and create graphics interactively on any device with a modern browser. Packages are provided as pre-compiled WebAssembly binaries from the <a href="https://repo.r-wasm.org/">r-wasm package repository</a>.</p>
+<p>This example demonstrates that <strong>deSolve</strong>, a package for numerical solution of differential equation models, now runs in webR as well. It simulates the classic Lorenz system — a benchmark example of deterministic chaos — and visualizes the result as time series and in a 3-dimensional phase space plot.</p>
+</section>
 <section id="how-to-use-this-example" class="level2">
-<h2 class="anchored" data-anchor-id="how-to-use-this-example">1. How to use this example</h2>
-<p>This example should run in the web browser.</p>
-<p>Modify the code and see it running in your browser.</p>
+<h2 class="anchored" data-anchor-id="how-to-use-this-example">2. How to use this example</h2>
+<p>This example should run directly in your web browser.</p>
+<ul>
+<li>Wait until webR is initialized and the packages are installed (this may take a moment on first load).</li>
+<li>Press the run button of the code cell, or modify the code first and then run it to explore the model.</li>
+</ul>
 <div class="column" style="width:100%;">
 <div id="qwebr-insertion-location-1"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 </div>
 </section>
 <section id="how-to-compile-this-example" class="level2">
-<h2 class="anchored" data-anchor-id="how-to-compile-this-example">How to compile this example</h2>
-<p>Checkout source code, and load it to RStudio. Make sure you have the most recent version of Quarto (&gt;= 1.11.9).</p>
-<p>Then open a terminal, make sure you are in the right folder and install webR to Rstudio:</p>
+<h2 class="anchored" data-anchor-id="how-to-compile-this-example">3. How to compile this example</h2>
+<p>Checkout the source code and load it into RStudio. Make sure you have the most recent version of Quarto (&gt;= 1.11.9).</p>
+<p>Then open a terminal, make sure you are in the right folder, and install the quarto-webr extension:</p>
 <pre><code>quarto add coatless/quarto-webr</code></pre>
 <p>then render the Quarto page from the menu or from the terminal with:</p>
 <pre><code>quarto render index.qmd</code></pre>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">4. Further reading</h2>
+<ul>
+<li><a href="https://docs.r-wasm.org/webr/latest/">webR — official documentation</a>: how webR works, its communication channels, and how to embed it in web pages.</li>
+<li><a href="https://repo.r-wasm.org/">r-wasm package repository</a>: pre-compiled WebAssembly binaries of R packages, including <strong>deSolve</strong>.</li>
+<li><a href="https://github.com/coatless/quarto-webr">quarto-webr extension</a>: the community-developed Quarto extension used in this example, which enables interactive webR code cells in HTML documents, Revealjs slides, websites, blogs, and books.</li>
+<li><a href="https://quarto-webr.thecoatlessprofessor.com/qwebr-first-steps.html">Making your first webR-powered Quarto document</a>: a step-by-step tutorial covering installation, rendering, and document-level customizations of the quarto-webr extension .</li>
+<li><a href="https://tomsing1.github.io/blog/posts/quarto-webr/">Embedding R into Quarto documents with quarto-webr</a>: a short blog post showing how the extension handles package installation from the YAML header.</li>
+<li><a href="https://cran.r-project.org/package=deSolve">deSolve on CRAN</a>: documentation and vignettes of the deSolve package for numerical solving of differential equations.</li>
+</ul>
 </section>
 
 </main>

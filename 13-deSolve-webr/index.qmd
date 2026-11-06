@@ -15,11 +15,29 @@ filters:
 ```
 
 
-## 1. How to use this example
+## 1. About webR and this example
 
-This example should run in the web browser.
+**What is webR?** [webR](https://docs.r-wasm.org/webr/latest/) is a version of the R interpreter
+compiled to WebAssembly, that runs entirely in the web browser — no server, no
+installation, no R setup required. It allows to run R code, load packages, and
+create graphics interactively on any device with a modern browser. Packages are
+provided as pre-compiled WebAssembly binaries from the
+[r-wasm package repository](https://repo.r-wasm.org/).
 
-Modify the code and see it running in your browser.
+This example demonstrates that **deSolve**, a package for numerical solution of
+differential equation models, now runs in webR as well. It simulates the
+classic Lorenz system — a benchmark example of deterministic chaos — and
+visualizes the result as time series and in a 3-dimensional phase space plot.
+
+## 2. How to use this example
+
+This example should run directly in your web browser.
+
+- Wait until webR is initialized and the packages are installed (this may take
+  a moment on first load).
+- Press the run button of the code cell, or modify the code first and then run
+  it to explore the model.
+  
 
 ::: {.column width="100%"}
 
@@ -55,12 +73,13 @@ scatterplot3d(out[,-1], type = "l")
 
 :::
 
-## 2. How to compile this example
+## 3. How to compile this example
 
+Checkout the source code and load it into RStudio. Make sure you have the most
+recent version of Quarto (>= 1.11.9).
 
-Checkout source code, and load it to RStudio. Make sure you have the most recent version of Quarto (>= 1.11.9).
-
-Then open a terminal, make sure you are in the right folder and install webR to Rstudio:
+Then open a terminal, make sure you are in the right folder, and install the
+quarto-webr extension:
 
 ```
 quarto add coatless/quarto-webr
@@ -72,6 +91,20 @@ then render the Quarto page from the menu or from the terminal with:
 quarto render index.qmd
 ```
 
+## 4. Further reading
 
-
+- [webR — official documentation](https://docs.r-wasm.org/webr/latest/):
+  how webR works, its communication channels, and how to embed it in web pages.
+- [r-wasm package repository](https://repo.r-wasm.org/):
+  pre-compiled WebAssembly binaries of R packages, including **deSolve**.
+- [quarto-webr extension](https://github.com/coatless/quarto-webr):
+  the community-developed Quarto extension used in this example, which enables
+  interactive webR code cells in HTML documents, Revealjs slides, websites,
+  blogs, and books.
+- [Making your first webR-powered Quarto document](https://quarto-webr.thecoatlessprofessor.com/qwebr-first-steps.html):
+  a step-by-step tutorial covering installation, rendering, and document-level
+  customizations of the quarto-webr extension .
+- [deSolve on CRAN](https://cran.r-project.org/package=deSolve):
+  documentation and vignettes of the deSolve package for numerical solving of
+  differential equations.
 
