@@ -1,0 +1,77 @@
+---
+title: "Test of deSolve in webR"
+editor: source
+format: html
+webr:
+  repo:
+    - https://repo.r-wasm.org/
+  show-startup-message: false             # Disable displaying status of webR initialization
+  packages: ['deSolve', 'scatterplot3d']  # Install R packages on document open
+filters:
+  - webr
+---
+
+```{r, echo=FALSE}
+```
+
+
+## 1. How to use this example
+
+This example should run in the web browser.
+
+Modify the code and see it running in your browser.
+
+::: {.column width="100%"}
+
+```{webr-r}
+#|  context: interactive
+#|  autorun: false
+#|  label: Lorenz
+#|  fig-height: 10
+#|  fig-width: 10
+
+library(deSolve)
+library(scatterplot3d)
+
+## Chaos in the atmosphere
+Lorenz <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)), {
+    dX <-  a * X + Y * Z
+    dY <-  b * (Y - Z)
+    dZ <- -X * Y + c * Y - Z
+    list(c(dX, dY, dZ))
+  })
+}
+
+parameters <- c(a = -8/3, b = -10, c = 28)
+state      <- c(X = 1, Y = 1, Z = 1)
+times      <- seq(0, 100, by = 0.01)
+
+out <- ode(y = state, times = times, func = Lorenz, parms = parameters)
+
+plot(out)
+scatterplot3d(out[,-1], type = "l")
+```
+
+:::
+
+## 2. How to compile this example
+
+
+Checkout source code, and load it to RStudio. Make sure you have the most recent version of Quarto (>= 1.11.9).
+
+Then open a terminal, make sure you are in the right folder and install webR to Rstudio:
+
+```
+quarto add coatless/quarto-webr
+```
+
+then render the Quarto page from the menu or from the terminal with:
+
+```
+quarto render index.qmd
+```
+
+
+
+

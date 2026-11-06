@@ -1,0 +1,58 @@
+---
+author: "Thomas Petzoldt"
+title: "Web-based applications"
+date: "2024-09-17"
+date-format: "YYYY-MM-DD"
+output-dir: docs
+format: 
+  revealjs:
+    theme: [sky, thpe-large.scss]
+    css: thpe.css
+    transition: fade
+    data-transition-speed: slow
+    navigation-mode: linear
+    slide-number: true
+    code-line-numbers: false
+    link-external-newwindow: true
+webr:
+  repo:
+    - https://repo.r-wasm.org/
+  show-startup-message: false    # Disable displaying status of webR initialization
+  packages: ['deSolve']          # Install R packages on document open
+filters:
+  - webr
+---
+
+```{r}
+```
+
+
+## foo
+
+::: {.column width="67%"}
+
+```{webr-r}
+#|  context: interactive
+#|  autorun: false
+#|  label: lotka-volterra
+#|  fig-height: 2.5
+#|  fig-width: 7
+
+library("deSolve")
+par(mar=c(4, 4, 1, 1), las = 1)
+
+model <- function(t, y, parms) {
+  with(as.list(c(y, parms)), {
+    dN <- r * N
+    list(c(dN))
+  })
+}
+
+y0    <- c(N = 1)
+parms <- c(r = 0.1)
+yout  <- as.data.frame(ode(y = y0, times = 0:50, func = model, parms = parms))
+plot(yout$time, yout$N, type = "l", col = "forestgreen")
+
+```
+:::
+
