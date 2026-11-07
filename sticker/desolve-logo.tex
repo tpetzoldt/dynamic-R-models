@@ -1,0 +1,39 @@
+\documentclass[tikz,border=2pt]{standalone}
+\usepackage{amsmath,graphicx}
+\usepackage{xcolor}
+
+\definecolor{hexfg}{HTML}{D2DC46}
+\definecolor{hexbg}{HTML}{00008C}
+%\definecolor{hexbg}{HTML}{001450}
+\definecolor{titlecol}{HTML}{FFFFFF}
+
+
+\begin{document}
+\begin{tikzpicture}
+  % background
+  \fill[hexbg]
+    (90:3) -- (150:3) -- (210:3) -- (270:3) -- (330:3) -- (30:3) -- cycle;
+  % border
+  \draw[hexfg, line width=4pt, line join=round]
+    (90:3) -- (150:3) -- (210:3) -- (270:3) -- (330:3) -- (30:3) -- cycle;
+
+  \begin{scope}[text=hexfg]
+  
+   
+    \node at (0,1.3) {\scalebox{1.8}{$\displaystyle\int_0^t{}f(x)\,dx$}};
+
+    
+    \node at (0.5,-0.6) {\includegraphics[width=5.3cm]{butterfly.pdf}};
+    
+    %\node at (0,1.8) {$\left[\begin{matrix}
+    %    \text{\sffamily\scriptsize ODE},\text{\sffamily\scriptsize DDE}\\
+    %    \text{\sffamily\scriptsize PDE},\text{\sffamily\scriptsize DAE}
+    %  \end{matrix}\right]$};
+
+    
+    \node[text=titlecol] at (-0.0,-1.1) {\sffamily\bfseries\LARGE deSolve};
+  \end{scope}
+\end{tikzpicture}
+\end{document}
+
+% pdftocairo -svg desolve-logo.pdf desolve-logo.svg
