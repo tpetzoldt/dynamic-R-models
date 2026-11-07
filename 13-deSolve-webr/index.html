@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.11.9">
+<meta name="generator" content="quarto-1.12.1">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -37,10 +37,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="index_files/libs/quarto-html/anchor.min.js"></script>
 <link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="index_files/libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting-6f4d992786adc40a866529610d8cdb02.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="index_files/libs/bootstrap/bootstrap-943e08653f4bd8ac7ab9292bfc489267.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="index_files/libs/bootstrap/bootstrap-64e9e834f44f0eb3fa465cbe54e080ae.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   
@@ -1598,11 +1598,11 @@ globalThis.qwebrExecuteCode = async function (
 
 </head>
 
-<body class="fullcontent quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a>
+<body class="quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a>
 
-<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
 
-<main class="content" id="quarto-document-content" tabindex="-1">
+<main class="content column-page" id="quarto-document-content" tabindex="-1">
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
 <script type="module" id="qwebr-monaco-editor-init">
 
@@ -1895,7 +1895,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     
   
@@ -1909,28 +1909,40 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 
 <section id="about-webr-and-this-example" class="level2">
 <h2 class="anchored" data-anchor-id="about-webr-and-this-example">1. About webR and this example</h2>
-<p><strong>What is webR?</strong> <a href="https://docs.r-wasm.org/webr/latest/">webR</a> is a version of the R interpreter compiled to WebAssembly, that runs entirely in the web browser — no server, no installation, no R setup required. It allows to run R code, load packages, and create graphics interactively on any device with a modern browser. Packages are provided as pre-compiled WebAssembly binaries from the <a href="https://repo.r-wasm.org/">r-wasm package repository</a>.</p>
+<section id="what-is-webr" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-webr">What is webR?</h3>
+<p><a href="https://docs.r-wasm.org/webr/latest/">webR</a> is a version of the R interpreter compiled to WebAssembly, that runs entirely in the web browser — no server, no installation, no R setup required. It allows to run R code, load packages, and create graphics interactively on any device with a modern browser. Packages are provided as pre-compiled WebAssembly binaries from the <a href="https://repo.r-wasm.org/">r-wasm package repository</a>.</p>
+</section>
+<section id="the-example" class="level3">
+<h3 class="anchored" data-anchor-id="the-example">The example</h3>
 <p>This example demonstrates that <strong>deSolve</strong>, a package for numerical solution of differential equation models, now runs in webR as well. It simulates the classic Lorenz system — a benchmark example of deterministic chaos — and visualizes the result as time series and in a 3-dimensional phase space plot.</p>
 </section>
-<section id="how-to-use-this-example" class="level2">
-<h2 class="anchored" data-anchor-id="how-to-use-this-example">2. How to use this example</h2>
+</section>
+<section id="how-to-use-it" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-use-it">2. How to use it</h2>
 <p>This example should run directly in your web browser.</p>
 <ul>
 <li>Wait until webR is initialized and the packages are installed (this may take a moment on first load).</li>
 <li>Press the run button of the code cell, or modify the code first and then run it to explore the model.</li>
 </ul>
-<div class="column" style="width:100%;">
 <div id="qwebr-insertion-location-1"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</div>
 </section>
-<section id="how-to-compile-this-example" class="level2">
-<h2 class="anchored" data-anchor-id="how-to-compile-this-example">3. How to compile this example</h2>
-<p>Checkout the source code and load it into RStudio. Make sure you have the most recent version of Quarto (&gt;= 1.11.9).</p>
-<p>Then open a terminal, make sure you are in the right folder, and install the quarto-webr extension:</p>
+<section id="how-to-compile-it" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-compile-it">3. How to compile it</h2>
+<ol type="1">
+<li>Make sure you have the most recent version of <a href="https://quarto.org/docs/download/">Quarto</a> (&gt;= 1.11.9).</li>
+<li>Checkout the <a href="https://github.com/tpetzoldt/dynamic-R-models/">source code</a> and load it into RStudio.</li>
+<li>Then open a terminal, make sure you are in the right folder, and install the quarto-webr extension:</li>
+</ol>
 <pre><code>quarto add coatless/quarto-webr</code></pre>
-<p>then render the Quarto page from the menu or from the terminal with:</p>
+<ol start="4" type="1">
+<li>then render the Quarto page from the menu or from the terminal with:</li>
+</ol>
 <pre><code>quarto render index.qmd</code></pre>
+<ol start="5" type="1">
+<li>Finally, open it in a compatible browser (e.g.&nbsp;Chrome) or upload it to your favorite web server.</li>
+</ol>
 </section>
 <section id="further-reading" class="level2">
 <h2 class="anchored" data-anchor-id="further-reading">4. Further reading</h2>
@@ -1938,10 +1950,21 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <li><a href="https://docs.r-wasm.org/webr/latest/">webR — official documentation</a>: how webR works, its communication channels, and how to embed it in web pages.</li>
 <li><a href="https://repo.r-wasm.org/">r-wasm package repository</a>: pre-compiled WebAssembly binaries of R packages, including <strong>deSolve</strong>.</li>
 <li><a href="https://github.com/coatless/quarto-webr">quarto-webr extension</a>: the community-developed Quarto extension used in this example, which enables interactive webR code cells in HTML documents, Revealjs slides, websites, blogs, and books.</li>
-<li><a href="https://quarto-webr.thecoatlessprofessor.com/qwebr-first-steps.html">Making your first webR-powered Quarto document</a>: a step-by-step tutorial covering installation, rendering, and document-level customizations of the quarto-webr extension .</li>
-<li><a href="https://tomsing1.github.io/blog/posts/quarto-webr/">Embedding R into Quarto documents with quarto-webr</a>: a short blog post showing how the extension handles package installation from the YAML header.</li>
+<li><a href="https://quarto-webr.thecoatlessprofessor.com/qwebr-first-steps.html">Making your first webR-powered Quarto document</a>: a step-by-step tutorial covering installation, rendering, and document-level customizations of the quarto-webr extension.</li>
 <li><a href="https://cran.r-project.org/package=deSolve">deSolve on CRAN</a>: documentation and vignettes of the deSolve package for numerical solving of differential equations.</li>
 </ul>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Source code of this example: <a href="https://github.com/tpetzoldt/dynamic-R-models/" class="uri">https://github.com/tpetzoldt/dynamic-R-models/</a></p>
+</div>
+</div>
+</div>
+<hr>
+<p><strong>Copyright and original author:</strong> <a href="https://github.com/tpetzoldt">tpetzoldt</a>, 2026-11-07</p>
 </section>
 
 </main>
@@ -2020,6 +2043,28 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
         var filterRegex = new RegExp('/' + window.location.host + '/');
+      const newWindowLabel = "(opens in a new tab)";
+      const newWindowNoteId = "quarto-ext-newwindow-label";
+      // Links reference one hidden label through aria-describedby, so the
+      // announcement never changes their accessible name.
+      var describeNewWindow = (link) => {
+        if (!window.document.getElementById(newWindowNoteId)) {
+          var newWindowNote = window.document.createElement("span");
+          newWindowNote.id = newWindowNoteId;
+          newWindowNote.hidden = true;
+          newWindowNote.textContent = newWindowLabel;
+          window.document.body.appendChild(newWindowNote);
+        }
+        var describedBy = (link.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+        if (!describedBy.includes(newWindowNoteId)) {
+          describedBy.push(newWindowNoteId);
+          link.setAttribute("aria-describedby", describedBy.join(" "));
+        }
+      }
+      var opensNewContext = (link) => {
+        var target = (link.getAttribute("target") || "").toLowerCase();
+        return target !== "" && !["_self", "_parent", "_top"].includes(target);
+      }
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -2036,6 +2081,9 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
           }
           if (!link.classList.contains('no-external-icon')) {
           }
+        }
+        if (opensNewContext(link)) {
+          describeNewWindow(link);
         }
       }
       };

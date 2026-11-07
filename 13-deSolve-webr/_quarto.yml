@@ -1,5 +1,0 @@
-project:
-  type: default
-  render: 
-    - "*.qmd"
-  
