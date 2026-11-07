@@ -1,7 +1,7 @@
 ---
 title: "Interactive web-based simulation models with deSolve and shiny"
 author: "Thomas Petzoldt"
-date: "2017-06-22, 2019-02-04"
+date: "2017-06-22, 2026-11-07"
 output:
   html_document:
     toc: true
@@ -15,16 +15,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library("deSolve")
 library("shiny")
-
-## The following setting uses the shiny apps are
-## - taken from local directories (FALSE)
-## - or started from a remote server (limno-live)
 ```
-
-
-<span style="color:red">Note: sometimes, the embedded shiny apps don't show up on Github.</span> Please use 
-[**this link**](https://weblab.hydro.tu-dresden.de/tutorials/deSolve-shiny.html) 
-as a temporary work around in such cases.
 
 
 ## Introduction
@@ -62,17 +53,15 @@ Chrome or Firefox.
 
 The Brusselator (Brussels Oscillator) a mathematical model of an
 autocatalytic reaction of two substances A and B, two intermediate products 
-X and Y and two final products C and D. The latter are continuesly removed.
+X and Y and two final products C and D. The latter are continuously removed.
 
 1. A &rarr; X
 2. B + X &rarr; Y + C
 3. 2X + Y &rarr;  3X
 4. X &rarr; D
 
-* developed by Ilya Prigogine and R. Lefever 1967,68 at the Université
-  Libre de Bruxelles
-* important theoretical example for studying oscillations and
-  bifurcation
+* developed by Ilya Prigogine and R. Lefever 1967,68 at the UniversitÃ© Libre de Bruxelles
+* important theoretical example for studying oscillations and bifurcation
 * see [Wikipedia](https://en.wikipedia.org/wiki/Brusselator) for details
 
 $$
@@ -85,10 +74,10 @@ $$
 
 ### The Brusselator in **R**
 
-Implementation of the model in **R** is straightforward. We need the package
-**deSolve**, translate the differential equations of the Brusselator
-into an R function, define initial values ($y_0$), parameters and time
-steps and then use ode for the numerical solution. Finally we plot the
+The implementation of the model in **R** is straightforward.
+We need the package **deSolve**, translate the differential equations of the
+Brusselator into an R function, define initial values ($y_0$), parameters and
+time steps and then use ode for the numerical solution. Finally we plot the
 results.
 
 ```{r, fig.height=4}
@@ -132,7 +121,7 @@ The second part creates the web interface. The app consists of a
 server element doing the computations and plotting, and a user
 interface (ui), that is responsible for handling user inputs and for
 sending the outputs back to the user.  Both parts, the server and the
-ui can be saved in a single file 'app.R'. It can then be run directly
+ui can be saved in a single file `app.R`. It can then be run directly
 from **RStudio** or placed on a shiny-enabled web server.
 
 **Exercise:** Copy the app to Rstudio, save it to the disc (fille
@@ -320,8 +309,9 @@ If you want to see the C code: [here is it](https://github.com/tpetzoldt/dynamic
 
 ## Further reading
 
-* The reference site of the **deSolve** package is http://desolve.r-forge.r-project.org
-* Further examples may appear at https://github.com/tpetzoldt/dynamic-R-models
+* Source code of this document and more examples at https://github.com/tpetzoldt/dynamic-R-models
+* The reference site of the **deSolve** package is https://github.com/tpetzoldt/deSolve
+
 
 ----
 
