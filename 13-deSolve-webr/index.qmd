@@ -2,8 +2,10 @@
 title: "Test of deSolve in webR"
 editor: source
 engine: knitr
-format: html
-page-layout: full
+format: 
+  html:
+    theme: cosmo
+#page-layout: full
 webr:
   repo:
     - https://repo.r-wasm.org/
@@ -14,8 +16,9 @@ filters:
 ---
 
 
+## 1. About webR and this example  
 
-## 1. About webR and this example
+
 
 ### What is webR?
 
